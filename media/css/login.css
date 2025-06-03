@@ -1,0 +1,29 @@
+.divider:after,
+.divider:before {
+content: "";
+flex: 1;
+height: 1px;
+background: #eee;
+}
+.h-custom {
+height: calc(100% - 73px);
+}
+.btn-primary {
+    background-color: #228B22;
+    border-color: #228B22;
+}
+.btn-primary:hover {
+    background-color: #5CB85C;
+    border-color: #5CB85C;
+}
+.navbar-brand__head {
+    color: #228B22;
+}
+.navbar-brand__fs--lg {
+    font-size: 3rem;
+}
+@media (max-width: 450px) {
+.h-custom {
+height: 100%;
+}
+}
