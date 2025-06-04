@@ -1,5 +1,3 @@
-<?php include_once "../layouts/.$this->layout./header.php"?>
-<div>
+<?php include_once "views/layouts/admin/header.php" ?>
 
-</div>
-<?php include_once "../layouts/.$this->layout./footer.php"?>
+<?php include_once "views/layouts/admin/footer.php" ?>

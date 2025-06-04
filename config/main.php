@@ -1,24 +1,75 @@
 <?php 
-    $domain = $_SERVER["SERVER_NAME"];
-    if ($_SERVER["SERVER_PORT"] != 80) 
-        $domain .= ":".$_SERVER["SERVER_PORT"];
-    $relRoot = dirname($_SERVER["SCRIPT_NAME"]);
+    date_default_timezone_set('Asia/Ho_Chi_Minh');
+    $domain = isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : 'localhost';
+    $port = isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
+
+    if ($port != 80) {
+        $domain .= ":" . $port;
+    }
+
+    $relRoot = isset($_SERVER["SCRIPT_NAME"]) ? dirname($_SERVER["SCRIPT_NAME"]) : '/';
     if (substr($relRoot, -1) != '/') {
         $relRoot .= '/';
     }
-    define('RootREL', $relRoot);
-    define('RootURI', dirname($_SERVER['SCRIPT_FILENAME']).'/');
-    define('UploadREL', 'media/uploads/');
-    define('UploadURI', $relRoot.UploadREL);
-    // Config for Database
-    define('DB_HOST', 'localhost');
-    define('DB_USER', 'admin');
-    define('DB_PASSWORD', 'Hkhan2712@');
-    define('DB_NAME', 'blog');
 
+    define('RootURL', 'http://'.$domain.$relRoot);
+    define('RootABS', 'http://'.$domain.$relRoot);
+    define('RootREL', $relRoot);
+    define('MediaREL', 'media/');
+    define('MediaURI', $relRoot.'media/');
+    define('UploadREL', 'media/upload/');
+    define('UploadURI', $relRoot.UploadREL);
+    define('RootURI', dirname($_SERVER['SCRIPT_FILENAME'])."/");
+
+    define('ControllerREL', 'controllers/');
+    define('AdminPath', 'admin');
+    define('ControllerAdminREL', ControllerREL."/".AdminPath);
+
+    define('DefaultImgW', 600);
+    // Global variables
     $app = [];
+    $app['area'] = 'users';
+    $app['areaPath'] = '';
+
+    $app['roles'] = [
+        '1' => 'admin',
+        '2' => 'user'
+    ];
+
+    $app['recordTime'] = [
+        'created' => 'created',
+        'updated' => 'updated'
+    ];
+
+    $app['months'] = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dece',
+    ];
+    $app['weekdays'] = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+    ];
     $mediaFiles = [
         'css' => [],
         'js' => []
-    ]
+    ];
+    $obMediaFiles = $mediaFiles;
+    include_once(__DIR__.'/database.php');
+
+    $enableOB = true;
 ?>

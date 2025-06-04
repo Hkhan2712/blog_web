@@ -1,5 +1,7 @@
 <?php
-class UserModel extends Model {
-    
+class UserModel extends MainModel {
+    public function __construct() {
+        echo "UserModel loaded";
+    }
 }
 ?>

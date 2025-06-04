@@ -1,5 +1,5 @@
 </div>
-<footer class="container d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top"> 
+<!-- <footer class="container d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top"> 
     <div class="col-md-4 d-flex align-items-center gap-3"> 
         <a href="/" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Bootstrap"> 
             <a href="" class="navbar-brand"><span class="navbar-brand__head">M</span>Blog</a>
@@ -22,7 +22,8 @@
             </a>
         </li> 
     </ul> 
-</footer>
+</footer> -->
+<footer></footer>
 </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>

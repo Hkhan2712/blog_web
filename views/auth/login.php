@@ -9,7 +9,7 @@
     <meta name="author" content="Hkhan2712">
 
     <title>MBlog - Login</title>
-    <link rel="icon" type="image/x-icon" href="<?=RootREL?>public/assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="<?=RootREL?>media/img/favicon.png">
     <!-- Custom fonts for this template-->
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
@@ -24,7 +24,7 @@
         <div class="container-fluid h-custom">
             <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-md-9 col-lg-6 col-xl-5">
-                <img src="<?=RootREL?>public/assets/background-login.png"
+                <img src="<?=RootREL?>media/img/background-login.png"
                 class="img-fluid rounded" alt="background login">
             </div>
             <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
