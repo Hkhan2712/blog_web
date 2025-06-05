@@ -21,6 +21,13 @@ height: calc(100% - 73px);
 }
 .navbar-brand__fs--lg {
     font-size: 3rem;
+    color: #003366;
+}
+span {
+    color:#228B22;
+}
+#title {
+    color: #003366;
 }
 @media (max-width: 450px) {
 .h-custom {

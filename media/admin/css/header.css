@@ -1,0 +1,19 @@
+.navbar-brand {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #003366;
+}
+.nav-link {
+    color: #0A0A0A;
+    font-weight: 500;
+}
+.nav-link:hover,
+.link-bell,
+.navbar-brand__head {
+    color: #228B22;
+}
+.nav-pills .nav-link.active {
+    color: #fff;
+    background-color: #228B22;
+}
+

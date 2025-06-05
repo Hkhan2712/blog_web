@@ -38,11 +38,39 @@ class CrudModel extends MainModel {
 
     }
 
-    public function editRecord($id, $datas, $options = null) {
+    public function editRecord($id, $datas, $conditions = null) {
+        global $app;
+        if (is_array($id)) {
+            $id = array_key_exists('id', $id) ? $id['id'] : $id[1];
+        }    
+        $setDatas = '';
+        $i = 0;
+        foreach ($datas as $k => $v) {
+            if (is_string($v)) {
+                $v = mysqli_real_escape_string($this->con, $v);
+            }
+            if ($i) {
+                $setDatas .= ',';
+            }
+            $setDatas .= $k. "='".$v."'";
+            $i++;
+        }
+        if ($updatedTime = $this->recordTime($app['recordTime']['updatedTime'])) {
+            $setDatas .= ','.$app['recordTime']['updatedTime'].'='.$updatedTime;
+        }
+        if ($conditions) $conditions = ' and '.$conditions;
+        $query = "UPDATE $this->table SET $setDatas where id ='$id'".$conditions;
 
+        if (mysqli_query($this->con, $query)) 
+            return true;
+        else {
+            $this->errors['type'] = 'database';
+            $this->errors['message'] = mysqli_error($this->con);
+            return false;
+        }
     }
 
-    public function editRecords($ids, $datas, $options = null) {
+    public function editRecords($ids, $datas, $conditions = null) {
 
     }
 

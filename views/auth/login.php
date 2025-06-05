@@ -31,7 +31,7 @@
                 <h1 class ="d-flex justify-content-center pb-2 navbar-brand__fs--lg"><span class="navbar-brand__head">M</span>Blog</h1>
                 <form>
                 <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                    <p class="lead fw-normal mb-0 me-3">Sign in with</p>
+                    <p class="lead fw-normal mb-0 me-3" id="title"><span>S</span>ign in with</p>
                     <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
                             <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
