@@ -35,4 +35,14 @@ class HtmlHelper {
 		$query = preg_replace($patterns, $replacements, $query);
 		return $query;
 	}
+	public static function _cssHeader() {
+		global $mediaFiles;
+		$cssFiles = "";
+		if(isset($mediaFiles['css']) && count($mediaFiles['css'])) {
+			foreach( $mediaFiles['css'] as $css) {
+				$cssFiles .= '<link href="'.$css.'" rel="stylesheet">';
+			}
+		}
+		return $cssFiles;
+	}
 }

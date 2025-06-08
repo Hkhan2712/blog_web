@@ -12,8 +12,15 @@
 .navbar-brand__head {
     color: #228B22;
 }
-.nav-pills .nav-link.active {
+.btn-primary, 
+.btn-primary:hover, 
+.nav-pills 
+.nav-link.active {
     color: #fff;
     background-color: #228B22;
+    border-color: #228B22;
+}
+.btn-primary:hover {
+    opacity: .8;
 }
 

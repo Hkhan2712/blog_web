@@ -1,0 +1,50 @@
+.dashboard {
+    max-height: 100vh;
+    overflow-y: auto;  
+}
+.report-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 2rem 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    width: calc(100%/3 - 1rem);
+}
+
+.report-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.report-icon {
+    width: 40px;
+    height: 40px;
+    color: #003366;
+    margin-bottom: 1rem;
+}
+
+.report-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #333;
+}
+
+.report-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+    color: #228B22;
+}
+
+.report-sub {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0;
+}

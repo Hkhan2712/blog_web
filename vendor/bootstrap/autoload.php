@@ -9,6 +9,7 @@ spl_autoload_register(function ($classname) {
         RootURI . 'models/',
         RootURI . 'utils/',
         RootURI . 'vendor/',
+        RootURI . 'vendor/helpers/',
     ];
 
     foreach ($baseDirs as $baseDir) {
@@ -52,6 +53,13 @@ spl_autoload_register(function ($classname) {
 
     if (preg_match('/Utils?$/i', $classname)) {
         $file = RootURI . 'utils/' . $classname . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+    if (preg_match('/Helper?$/i', $classname)) {
+        $file = RootURI. 'vendor/helpers/'. $classname . '.php';
         if (file_exists($file)) {
             require_once $file;
             return;

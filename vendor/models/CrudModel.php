@@ -207,26 +207,117 @@ class CrudModel extends MainModel {
     }
 
     public function editRecords($ids, $datas, $conditions = null) {
-
+        global $app;
+        $setDatas = '';
+        $i = 0;
+        foreach ($datas as $k => $v) {
+            if ($i) {
+                $setDatas .= ',';
+            }
+            $v = HtmlHelper::processSQLString($v);
+            $setDatas .= $k."='".$v."'";
+            $i++;
+        }
+        if ($updatedTime = $this->recordTime($app['recordTime']['updated'])) {
+            $setDatas .= ','.$app['reacordTime']['updated'].'='.$updatedTime;
+        }
+        if ($conditions) $conditions = ' and '.$conditions;
+        $ids = HtmlHelper::processSQLString($ids);
+        $query = "UPDATE $this->table SET $setDatas where id in ($ids)".$conditions;
+        if (mysqli_query($this->con, $query)) 
+            return true;
+        else {
+            $this->error = mysqli_error($this->con);
+            return false;
+        }
     }
 
     public function editRecordsWhere($data, $conditions = "") {
-
+        $i = 0;
+        $setDatas = '';
+        foreach ($data as $k=>$v) {
+            if ($i) {
+                $setDatas .= ',';
+            }
+            $setDatas .= $k."='".$v."'";
+            $i++;
+        }
+        $query = "UPDATE $this->table SET $setDatas ".($conditions!=""?"WHERE ".$conditions:'');
+        if (mysqli_query($this->con, $query))
+            return true;
+        else {
+            $this->error = mysqli_error($this->con);
+            return false;
+        }
     }
 
     public function deleteRecordsWhere($conditions = "") {
-
+        $query = "DELETE FROM ".$this->table.($conditions != "" ? "WHERE ".$conditions : '');
+        if (mysqli_query($this->con, $query)) 
+            return true;
+        else {
+            $this->error = mysqli_error($this->con);
+            return false;
+        }
     }
 
     public function recordTime($field) {
-
+        $fields = $this->getColumnsName();
+        $recordTime = "";
+        $datetime = date('Y-m-d h:i:s', time());
+        if (in_array($field, $fields)) {
+            $recordTime .= '"'.$datetime.'"';
+        }
+        return $recordTime;
     }
 
     public function getColumnsName() {
+        $sql = 'DESCRIBE '.$this->table;
+        $result = mysqli_query($this->con, $sql);
 
+        $rows = array();
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $rows[] = $row['Field'];
+            }
+        }
+        return $rows;
     }
 
     public function validator($data, $editId = false) {
-        
+        $rs = ['status'=>true, 'message'=>[]];
+        $rules = $this->rules();
+        foreach ($data as $field => $dv) {
+            $errMessages = [$field=>[]];
+            if (isset($rules[$field])) {
+                foreach ($rules[$field] as $rv) {
+                    if (is_array($rv)) {
+                        $validName = $rv[0];
+                        $rvv = (isset($rv['value'])) ? $rv['value'] : false;
+                    } else {
+                        $validName = $rv;
+                    }
+                    $validFuncName = $validName.'Field';
+	    			if($validName == 'unique') {
+	    				if($editId===false)
+	    					$vlf = $this->{$validFuncName}($dv, $field);
+	    				else $vlf = $this->{$validFuncName}($dv, $field, $editId);
+	    			} 
+	    			else if($validName == 'matchPassword') {
+	    				$vlf = $this->{$validFuncName}($dv,$data['password']);
+	    			}else if(isset($rvv) && $rvv) {
+	    			    $vlf = $this->{$validFuncName}($dv, $rvv);
+	    			} else {
+	    				$vlf = $this->{$validFuncName}($dv);
+	    			}
+	    			if(!$vlf['status']) {
+	    				$rs['status']=false;
+						$errMessages[$field][$validName] = $vlf['message'];
+	    				$rs['message'][$field] = $errMessages[$field];
+	    			}
+	    		}
+	    	}
+    	}
+    	return $rs;
     }
 }

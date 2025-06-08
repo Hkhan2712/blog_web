@@ -1,0 +1,42 @@
+.page-link,
+.page-link:hover{
+    color: #228B22;
+}
+.btn-primary-color,
+.btn-primary-color:hover {
+    background-color: #228B22;
+    color: #fff;
+}
+.btn-primary-color:hover {
+    opacity: 0.8;
+}
+.page-link:hover {
+    opacity: 0.8;
+}
+td a.view {
+    border-color: #228B22;
+    color: #228B22;
+}
+td a.view:hover {
+    background-color:#228B22;
+    border-color: #228B22;
+    color: #fff;
+}
+td a.edit {
+    border-color:#ffc107;
+    color:#FFC107;
+}
+td a.edit:hover {
+    background-color:#FFC107;
+    border-color:#ffc107;
+    color: #fff;
+}
+td a.delete {
+    border-color:#f44336;
+    color:#F44336;
+}
+td a.delete:hover {
+    background-color:#F44336;
+    border-color:#f44336;
+    color: #fff;
+}

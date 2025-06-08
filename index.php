@@ -5,5 +5,5 @@
 include_once(__DIR__.'/vendor/bootstrap/autoload.php');
 include_once(__DIR__.'/config/main.php');
 include_once(__DIR__.'/vendor/bootstrap/app.php');
-include_once(__DIR__.'/views/home/index.php');
+include_once(__DIR__.'/views/auth/register.php');
 // Test class không namespace
