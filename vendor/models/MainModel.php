@@ -17,7 +17,14 @@ class MainModel {
         if (!$this->table) 
             $this->setTableName();
     }
-
+    
+    public static function getInstance() {
+        $calledClass = get_called_class();
+        if (!array_key_exists($calledClass, self::$intances)) {
+            self::$intances[$calledClass] = new $calledClass();
+        }
+        return self::$intances[$calledClass];
+    }
     protected function setTableName($table = null) {
         if ($table) {
             $this->table = $table;

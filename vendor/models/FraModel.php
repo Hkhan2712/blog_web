@@ -1,5 +1,5 @@
 <?php 
-class FraModel extends CrudModel{
+class FraModel extends CrudModel {
     public function all($fields="*", $options = null) {
         $resultMObject = parent::getRecords($fields, $options);
         if ($resultMObject) {

@@ -1,4 +1,6 @@
 <?php 
-class HomeController {
-    
+class HomeController extends MainController {
+    public function index() {
+        $this->display();
+    }
 }

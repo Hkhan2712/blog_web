@@ -54,7 +54,6 @@ foreach ($_GET as $k => $v) {
 }
 
 $c = ucfirst($app['ctl'])."Controller";
-
 if (!is_file(ControllerREL.$app['areaPath'].$c.'.php')) {
     $c = 'StaticpagesController';
     $app['ctl'] = 'staticpages';
@@ -62,3 +61,4 @@ if (!is_file(ControllerREL.$app['areaPath'].$c.'.php')) {
 }
 
 $controller = new $c();
+?>

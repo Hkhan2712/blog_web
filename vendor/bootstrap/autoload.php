@@ -8,8 +8,10 @@ spl_autoload_register(function ($classname) {
         RootURI . 'controllers/admin/',
         RootURI . 'models/',
         RootURI . 'utils/',
+        RootURI . 'vendor/utils/',
         RootURI . 'vendor/',
         RootURI . 'vendor/helpers/',
+        RootURI . 'vendor/controllers/',
     ];
 
     foreach ($baseDirs as $baseDir) {
@@ -44,14 +46,19 @@ spl_autoload_register(function ($classname) {
     }
 
     if (preg_match('/Controller$/', $classname)) {
-        $file = RootURI . 'controllers/' . $classname . '.php';
-        if (file_exists($file)) {
-            require_once $file;
-            return;
+        $paths = [
+            RootURI . 'controllers/' . $classname . '.php',
+            RootURI . 'vendor/controllers/' . $classname . 'php'
+        ];
+        foreach ($paths as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+                return;
+            }
         }
     }
 
-    if (preg_match('/Utils?$/i', $classname)) {
+    if (preg_match('/Util?$/i', $classname)) {
         $file = RootURI . 'utils/' . $classname . '.php';
         if (file_exists($file)) {
             require_once $file;

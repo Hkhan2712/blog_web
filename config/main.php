@@ -17,7 +17,7 @@
     define('RootREL', $relRoot);
     define('MediaREL', 'media/');
     define('MediaURI', $relRoot.'media/');
-    define('UploadREL', 'media/upload/');
+    define('UploadREL', 'media/uploads/');
     define('UploadURI', $relRoot.UploadREL);
     define('RootURI', dirname($_SERVER['SCRIPT_FILENAME'])."/");
 
