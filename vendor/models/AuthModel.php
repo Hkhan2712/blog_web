@@ -44,4 +44,45 @@ class AuthModel extends MainModel {
         }
         return 0;
     }
+    public function register($user) {
+        $um = new UserModel();
+        $user['username'] = isset($user['username']) ? $user['username'] : '';
+        $user['email'] = isset($user['email']) ? $user['email'] : '';
+        $user['password'] = AppUtil::generatePassword($user['password']);
+        $user['status'] = 1; // Mặc định là active
+        // $user['created_at'] = date('Y-m-d H:i:s');
+        // $user['updated_at'] = date('Y-m-d H:i:s');
+        return $um->addRecord($user);
+    }
+    public function isLoggedIn() {
+        return isset($_SESSION['user']) && !empty($_SESSION['user']);
+    }
+    public function isAdmin() {
+        global $app;
+        $rolesFlip = array_flip($app['roles']);
+        return isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == $rolesFlip['admin'];
+    }
+    public function isUser() {
+        global $app;
+        $rolesFlip = array_flip($app['roles']);
+        return isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == $rolesFlip['user'];
+    }
+    public function getUser() {
+        return isset($_SESSION['user']) ? $_SESSION['user'] : null;
+    }
+    public function getUserId() {
+        return isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
+    }
+    public function getUserRole() {
+        return isset($_SESSION['user']['role']) ? $_SESSION['user']['role'] : null;
+    }
+    public function getUserName() {
+        return isset($_SESSION['user']['name']) ? $_SESSION['user']['name'] : null;
+    }
+    public function getUserEmail() {
+        return isset($_SESSION['user']['email']) ? $_SESSION['user']['email'] : null;
+    }
+    public function getUserAvatar() {
+        return isset($_SESSION['user']['avatar']) ? $_SESSION['user']['avatar'] : null;
+    }
 }
