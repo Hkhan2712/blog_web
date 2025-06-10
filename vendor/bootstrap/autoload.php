@@ -12,6 +12,8 @@ spl_autoload_register(function ($classname) {
         RootURI . 'vendor/',
         RootURI . 'vendor/helpers/',
         RootURI . 'vendor/controllers/',
+        RootURI . 'vendor/models/',
+        RootURI . 'vendor/validators/',
     ];
 
     foreach ($baseDirs as $baseDir) {

@@ -1,10 +1,17 @@
 <?php include_once "views/layouts/user/header.php" ?>
 <section class="container py-5">
     <div class="title d-flex flex-column">
-        <h1>How to become Software engineering</h1>
+        <h1><?= $this->record['title'];?></h1>
         <div class="d-flex gap-3 pb-2">
-            <span class="tag">Technology</span>
-            <span class="tag">Career</span>
+            <?php
+            $tags = [];
+            if (isset($this->record['tags']) && $this->record['tags']) {
+                $tags = array_map('trim', explode(',', $this->record['tags']));
+            }; 
+            ?>
+            <?php foreach ($tags as $tag){ ?>
+                <span class="tag"><?= htmlspecialchars($tag) ?></span>
+            <?php }?>
         </div>
         <div class="infor-detail d-flex gap-3">
             <div class="time d-flex gap-2 align-items-center">

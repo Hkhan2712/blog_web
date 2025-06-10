@@ -1,6 +1,6 @@
 <?php 
 class CrudModel extends MainModel {
-    use Validator;
+    // use Validator;
 
     public function delRecord($id = null, $conditions = null) {
         if (is_array($id)) {
@@ -168,10 +168,28 @@ class CrudModel extends MainModel {
                 $values .= ',';
             }
             $fields .= $k;
-            $values .= "'".$v.".";
+            $values .= "'".$v."'";
             $i++;
         }
-        
+        if(isset($app['recordTime']['created']) && $createdTime = $this->recordTime($app['recordTime']['created'])) {
+        $fields .= ','.$app['recordTime']['created'];
+        $values .= ','.$createdTime;
+        }
+        // Thêm updated_at nếu có trong cấu hình
+        if(isset($app['recordTime']['updated']) && $updatedTime = $this->recordTime($app['recordTime']['updated'])) {
+            $fields .= ','.$app['recordTime']['updated'];
+            $values .= ','.$updatedTime;
+        }
+		$query = "INSERT INTO $this->table($fields) VALUES ($values)";
+        echo $query;
+		if(mysqli_query($this->con,$query)){
+			return $this->con->insert_id;
+		}
+		else {
+			$this->errors['type']		=	'database';
+			$this->errors['message'] 	= mysqli_error($this->con);
+			return false;
+		}
     }
 
     public function editRecord($id, $datas, $conditions = null) {

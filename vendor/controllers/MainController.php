@@ -46,8 +46,9 @@ class MainController {
 		if(!isset($options['ctl']))		$options['ctl'] = $this->controller;
 		if(!isset($options['act']))		$options['act'] = $this->action;
 		$view = "views/".$options['area'].$options['ctl']."/".$options['act'].".php";
-		if (is_file($view)) 
+		if (is_file($view)) {
 			include_once $view;
+		}
 		else {
 			// $this->viewfile = $view;
 			include_once "views/".$options['area']."staticpages/missingview.php";

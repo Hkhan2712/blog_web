@@ -15,7 +15,7 @@ class AuthModel extends MainModel {
 
         if ($remember) {
             $remember_me_identify = $remember['remember_me_identify'];
-            $remember_me_token = $remember['remeber_me_token'];
+            $remember_me_token = $remember['remember_me_token'];
             $result = $um->getRecordWhere([
                 'remember_me_identify' => HtmlHelper::processSQLString($remember_me_identify),
                 'remember_me_token' => HtmlHelper::processSQLString($remember_me_token),
@@ -48,10 +48,8 @@ class AuthModel extends MainModel {
         $um = new UserModel();
         $user['username'] = isset($user['username']) ? $user['username'] : '';
         $user['email'] = isset($user['email']) ? $user['email'] : '';
-        $user['password'] = AppUtil::generatePassword($user['password']);
+        $user['password_hash'] = AppUtil::generatePassword($user['password_hash']);
         $user['status'] = 1; // Mặc định là active
-        // $user['created_at'] = date('Y-m-d H:i:s');
-        // $user['updated_at'] = date('Y-m-d H:i:s');
         return $um->addRecord($user);
     }
     public function isLoggedIn() {

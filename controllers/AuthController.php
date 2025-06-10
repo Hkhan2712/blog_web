@@ -42,10 +42,25 @@ class AuthController extends MainController {
     }
     public function login() {
         if (isset($_POST['btn_submit'])) {
-            $user = $_POST['user'];
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+            if (empty($email) || empty($password)) {
+                $this->errors = ['message' => 'Email and password can not be empty!'];
+                $this->display(); 
+                return;
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->errors = ['message' => 'Email is not valid!'];
+                $this->display(); 
+                return;
+            }
+            $user = [
+                'email' => $email,
+                'password_hash' => $password,
+            ];
             $auth = AuthModel::getInstance();
             if ($auth->login($user)) {
-                header("Location: ".AppUtil::url());
+                header("Location: ".AppUtil::url(array('ctl' => 'home')));
             } else {
                 $this->errors = ['message' => 'Can not login with your account!'];   
             }
@@ -62,12 +77,41 @@ class AuthController extends MainController {
     }
     public function register() {
         if (isset($_POST['btn_submit'])) {
-            $user = $_POST['user'];
+            $username = $_POST['username'];
+            $email = $_POST['email'];
+            if (empty($username) || empty($email)) {
+                $this->errors = ['message' => 'Username and email can not be empty!'];
+                $this->display(); 
+                return;
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->errors = ['message' => 'Email is not valid!'];
+                $this->display(); 
+                return;
+            }
+            $password = $_POST['password_hash'];
+            if (empty($password)) {
+                $this->errors = ['message' => 'Password can not be empty!'];
+                $this->display(); 
+                return;
+            }
+            $user = [
+                'username' => $username,
+                'email' => $email,
+                'password_hash' => $password,
+            ];
+
+            if ($_POST['password_hash'] != $_POST['repeat_password']) {
+                $this->errors = ['message' => 'Passwords do not match!'];
+                $this->display(); 
+                return;
+            }
+
             $auth = AuthModel::getInstance();
             if ($auth->register($user)) {
                 header("Location: ".AppUtil::url(array('ctl' => 'auth', 'act' => 'login')));
             } else {
-                $this->errors = ['message' => 'Can not register with your account!'];   
+                $this->errors = ['message' => 'Can not register with your account!'];
             }
         }
         $this->display();

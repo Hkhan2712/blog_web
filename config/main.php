@@ -37,8 +37,8 @@
     ];
 
     $app['recordTime'] = [
-        'created' => 'created',
-        'updated' => 'updated'
+        'created' => 'created_at',
+        'updated' => 'updated_at'
     ];
 
     $app['months'] = [

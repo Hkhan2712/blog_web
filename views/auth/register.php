@@ -34,28 +34,28 @@
                                 <i class="fas fa-user fa-lg me-3 fa-fw"></i>
                                 <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                     <label class="form-label" for="username">Your Name</label>
-                                    <input type="text" id="username" class="form-control" placeholder="Yourname" name="user[username]"/>
+                                    <input type="text" id="username" class="form-control" placeholder="Yourname" name="username"/>
                                 </div>
                             </div>
                             <div class="d-flex flex-row align-items-center mb-4">
                                 <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                                 <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                     <label class="form-label" for="user_email">Your Email</label>
-                                    <input type="email" id="user_email" class="form-control" placeholder="Enter your email" name="user[email]"/>
+                                    <input type="email" id="user_email" class="form-control" placeholder="Enter your email" name="email"/>
                                 </div>
                             </div>
                             <div class="d-flex flex-row align-items-center mb-4">
                                 <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                                 <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                     <label class="form-label" for="password">Password</label>
-                                    <input type="password" id="password" class="form-control" name="user[password]"/>
+                                    <input type="password" id="password" class="form-control" name="password_hash"/>
                                 </div>
                             </div>
                             <div class="d-flex flex-row align-items-center mb-4">
                                 <i class="fas fa-key fa-lg me-3 fa-fw"></i>
                                 <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                     <label class="form-label" for="form3Example4cd">Repeat your password</label>
-                                    <input type="password" id="form3Example4cd" class="form-control" />
+                                    <input type="password" id="form3Example4cd" class="form-control" name="repeat_password"/>
                                 </div>
                             </div>
                             <div class="form-check d-flex justify-content-center mb-3">
@@ -71,10 +71,8 @@
 
                     </div>
                     <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
-
                         <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
                         class="img-fluid" alt="Sample image">
-
                     </div>
                     </div>
                 </div>

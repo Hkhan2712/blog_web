@@ -92,48 +92,50 @@ class MainModel {
         return $result->fetch_assoc()['total'];
     }
 
-    public function getRecords($fields = '*', $options = null) {
-        if ($fields == '*') $fields = $this->table.".*";
-        $join = '';
-        $conditions = (isset($options['conditions']) && $options['conditions']) ? $options['conditions'] : '';
+    public function getRecords($fields='*', $options=null) {
+		if($fields=='*') $fields = $this->table.".*";
+		$join = "";
+		$conditions = (isset($options['conditions']) && $options['conditions'])? $options['conditions']: '';
 
-        if (isset($this->relationships) && (isset($options['joins']) && $conditions['joins'])) {
-            $joinR = $this->addJoins($options);
-            $join = $joinR['join'];
-            $fields .= $joinR['joinFields'];
+		if(isset($this->relationships) && (isset($options['joins']) && $options['joins'])) {
+			$joinR = $this->addJoins($options);
+			$join =	$joinR['join'];
+			$fields .= $joinR['joinFields'];;
 
-            $conditions = $conditions ? $this->conditionsJoin($conditions) : '';
-        }
-        $conditions = $conditions ? ' where '.$conditions: '';
+			// Add table prefix for conditions 
+			$conditions = $conditions? $this->conditionsJoin($conditions):"";
+		}
+		$conditions = $conditions? ' WHERE '.$conditions: "";
 
-        $group = "";
-        if (isset($options['group'])) {
-            $group = " GROUP BY ";
-            if (strpos($options['group'], '.') !== false) {
-                $group .= $options['group'];
-            } else $group .= $this->table.".".$options['group'];
-        }
+		$group = "";
+		if(isset($options['group'])) {
+			$group = " GROUP BY ";
+			if (strpos($options['group'], '.') !== false) {
+				$group .= $options['group'];
+			} else 	$group .= $this->table.".".$options['group'];
+		}
 
-        $order = " ORDER BY ";
-        if (isset($options['order'])) {
-            if (substr($options['order'], 0, 1)) {
-                $order .= substr($options['order'],1);
-            } elseif (strpos($options['orders'], '.') !== false) {
-                $order .= $options['order'];
-            } else $order .= $this->table.".".$options['order'];
-        } else 
-            $order .= $this->table.".created DESC";
-        
-        $limit = "";
-        if (isset($options['pagination'])) {
-            if (!isset($options['pagination']['page'])) $this->curp = $options['pagination']['page'];
-            if (!isset($options['pagination']['nopp'])) $this->nopp = $options['pagination']['nopp'];
-            $limit = " LIMIT $this->nopp OFFSET ".($this->curp-1) * $this->nopp;
-        }
+		$order = " ORDER BY ";
+		if(isset($options['order'])) {
+			if(substr($options['order'], 0, 1) == '*' ){
+				$order .= substr($options['order'], 1);
+			}
+			else if (strpos($options['order'], '.') !== false) {
+				$order .= $options['order'];
+			} else 	$order .= $this->table.".".$options['order'];
+		} else
+			$order .= $this->table.".created DESC";
 
-        $sql = "SELECT ".$fields." FROM ".$this->table.$join.$conditions.$group.$order.$limit;
-        return $this->con->query($sql);
-    }
+		$limit = "";
+		if(isset($options['pagination'])) {
+			if(isset($options['pagination']['page'])) $this->curp = $options['pagination']['page'];
+			if(isset($options['pagination']['nopp'])) $this->nopp = $options['pagination']['nopp'];
+			$limit = " LIMIT $this->nopp OFFSET ".($this->curp-1)*$this->nopp;
+		}
+
+		$sql = "SELECT ".$fields." FROM ".$this->table.$join.$conditions.$group.$order.$limit;
+		return $this->con->query($sql);
+	}
 
     public function getRecordsWhere($wheres, $fields = '*', $options = null) {
         $conditions = " WHERE ";
@@ -221,7 +223,14 @@ class MainModel {
             $joinConditions = $this->conditionsJoin($opConditions);
         }
         $conditions = is_array($opConditions) ? $this->conditionsJoin($opConditions) : ($joinConditions ?? $opConditions);
-        $conditions = "WHERE ". $conditions;
+        $conditions = trim($conditions); // thêm dòng này để tránh lỗi do khoảng trắng
+
+        if (!empty($conditions)) {
+            $conditions = "WHERE " . $conditions;
+        } else {
+            $conditions = ''; // không có điều kiện thì bỏ WHERE
+        }
+
 
         $group = "";
         if (isset($options['group'])) {
@@ -305,7 +314,7 @@ class MainModel {
             $j = 0;
             $arr = explode(" ", $conditions);
             foreach ($arr as $v) {
-                if (strpos($v, $this->table,'.') === false) {
+                if (strpos($v, $this->table.'.') === false) {
                     if (strpos($v, '(') !== false) 
                         $rs .= ($j ? " " : "").str_replace('(', '('.$table.'.', $v);
                     else {
@@ -333,41 +342,41 @@ class MainModel {
     }
 
     protected function addJoins($options=null) {
-  	$join = $joinFields = "";
-		foreach($this->relationships as $k=>$rv) {
-			if(!AppUtil::isMultiArray($rv)) {
-				$vtmp = $rv;
-				$rv = [];
-				$rv[] = $vtmp;
-			}
-			foreach($rv as $v) {
-				if(isset($options['joins']) && !in_array($v[0],$options['joins']))
-					continue;
-				$joinTable = AppUtil::isMultiArray($v[0]);
-				$joinTableFields = $this->getAllFieldsOfTable($joinTable);
-				if($k=="belongTo") {
-					foreach ($joinTableFields as $field) {
-						$joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
-					}
-					$join .= " LEFT JOIN ".$joinTable." ON ".$this->table.".".$v['key']."=".$joinTable.".id ";
-				} else if($k=="hasMany" && isset($options['get-child']) && $options['get-child']) {
-					foreach ($joinTableFields as $field) {
-						$joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
-					}
-					$join .= " RIGHT JOIN ".$joinTable." ON ".$this->table.".id=".$joinTable.".".$v['key']." ";
-				}else if($k=="hasMany" && isset($options['search-left-join']) && $options['search-left-join']) {
-					if(isset($options['onlycolumn']) && $options['onlycolumn']){
-					}else{
-						foreach ($joinTableFields as $field) {
-							$joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
-						}
-					}
-					$join .= " LEFT JOIN ".$joinTable." ON ".$this->table.".id=".$joinTable.".".$v['key']." ";
-				}
-			}
-		}
-  	return ['join'=>$join, 'joinFields'=>$joinFields];
-  }
+        $join = $joinFields = "";
+            foreach($this->relationships as $k=>$rv) {
+                if(!AppUtil::isMultiArray($rv)) {
+                    $vtmp = $rv;
+                    $rv = [];
+                    $rv[] = $vtmp;
+                }
+                foreach($rv as $v) {
+                    if(isset($options['joins']) && !in_array($v[0],$options['joins']))
+                        continue;
+                    $joinTable = NounUtils::pluralize($v[0]);
+                    $joinTableFields = $this->getAllFieldsOfTable($joinTable);
+                    if($k=="belongTo") {
+                        foreach ($joinTableFields as $field) {
+                            $joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
+                        }
+                        $join .= " LEFT JOIN ".$joinTable." ON ".$this->table.".".$v['key']."=".$joinTable.".id ";
+                    } else if($k=="hasMany" && isset($options['get-child']) && $options['get-child']) {
+                        foreach ($joinTableFields as $field) {
+                            $joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
+                        }
+                        $join .= " RIGHT JOIN ".$joinTable." ON ".$this->table.".id=".$joinTable.".".$v['key']." ";
+                    }else if($k=="hasMany" && isset($options['search-left-join']) && $options['search-left-join']) {
+                        if(isset($options['onlycolumn']) && $options['onlycolumn']){
+                        }else{
+                            foreach ($joinTableFields as $field) {
+                                $joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
+                            }
+                        }
+                        $join .= " LEFT JOIN ".$joinTable." ON ".$this->table.".id=".$joinTable.".".$v['key']." ";
+                    }
+                }
+            }
+        return ['join'=>$join, 'joinFields'=>$joinFields];
+    }
 
 	public function getTotal($field, $conditions=null, $table=null) {
 		if(!$table)	$table = $this->table;
