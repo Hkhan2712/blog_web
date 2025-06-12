@@ -120,14 +120,13 @@ class MainController {
 		    } else {
 		    	$folder=$this->controller;
 		    }
-			$ulfd = RootURI.UploadREL .$folder.'/'.date("Y/m/d").'/';
+			$ulfd = RootURI.UploadREL .$folder.'/';
 			if (!file_exists($ulfd)) {
 				mkdir($ulfd, 0777, true);
 			}
 			$newfn = str_replace('/','-',date("Y/m/d")).'-'.time().rand(10000,99999).'.'.$type;
 
 			$newSize = (isset($options['newSize']))? $options['newSize']: [];
-
 		    if (!file_exists($ulfd . $newfn)) {
 			move_uploaded_file($files[$name]["tmp_name"], $ulfd.$newfn);
 				$simpleImg = new SimpleImageComponent($ulfd.$newfn);
@@ -147,8 +146,8 @@ class MainController {
 					}
 				}
 		    }
-
-			return date("Y/m/d").'/'.$newfn;
+			return '/'.$newfn;
+			// return date("Y/m/d").'/'.$newfn;
 		} else {
 			return false;
 		}

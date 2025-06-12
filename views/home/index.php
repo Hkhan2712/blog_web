@@ -2,7 +2,7 @@
 <section class="container pt-120">
     <h1>Uncover fresh perspectives, ideas, and knowledge <br>through the power of blogs.</h1>
     <p>Redfy is an open platform where readers find dynamic thinking, and where expert and undiscovered voices can share their writing on any topic</p>
-    <a href="" class="btn btn-primary">Start Reading 
+    <a href="<?= AppUtil::url(['ctl' => 'post'])?>" class="btn btn-primary">Start Reading 
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
         </svg>
@@ -22,7 +22,7 @@
                         </svg>
                         <p><?= $this->outstanding['created_at']?></p>
                     </div>
-                    <a class="h3"><?= $this->outstanding['title']?></a>
+                    <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$this->outstanding['id']]])?>" class="h3"><?= $this->outstanding['title']?></a>
                     <p>
                         <?= $this->outstanding['excerpt']?>
                     </p>
@@ -38,8 +38,8 @@
                     $tags = array_map('trim', explode(',', $post['tags']));
                 }?>
                 <li class="post-item row d-flex align-items-stretch" style="min-height: 150px;">
-                    <img src="<?=RootREL."media/uploads/posts/".$post['image_url']?>" alt="" class="post-image col-4">
-                    <div class="post-content col-8">
+                    <img src="<?=RootREL."media/uploads/posts/".$post['image_url']?>" alt="" class="post-image col-4 p-0">
+                    <div class="post-content col-8 p-0">
                         <p class="detail">
                             <?=$post['author_name']?> 
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dot" viewBox="0 0 16 16">
@@ -47,7 +47,7 @@
                             </svg>
                             <?=date("F d Y", strtotime($post['created_at']))?>
                         </p>
-                        <a class="h4"><?=$post['title']?></a>
+                        <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]])?>" class="h4"><?=$post['title']?></a>
                         <div class="d-flex gap-2">
                             <?php foreach ($tags as $tag): ?>
                                 <span class="tag"><?= htmlspecialchars($tag) ?></span>
@@ -105,10 +105,10 @@
                                 <span class="tag"><?= htmlspecialchars($tag) ?></span>
                             <?php endforeach; ?>
                         </div>
-                        <a href="" class="h3"><?= htmlspecialchars($post['title']) ?></a>
+                        <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]]) ?>" class="h3"><?= htmlspecialchars($post['title']) ?></a>
                         <p><?= htmlspecialchars($post['excerpt']) ?></p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="<?php AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => ['id' => $post['id']]]) ?>" class="btn">Read More</a>
+                            <a href="<?php echo AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]]) ?>" class="btn">Read More</a>
                         </div>
                     </div>
                 </div>

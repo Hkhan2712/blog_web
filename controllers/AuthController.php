@@ -18,11 +18,17 @@ class AuthController extends MainController {
         $rolesFlip = array_flip($app['roles']);
         if (isset($_SESSION['user']['role'])) {
             // Nếu là admin thì chuyển về dashboard
-            if ($_SESSION['user']['role'] == $rolesFlip['admin']) {
+            // if ($_SESSION['user']['role'] == $rolesFlip['admin']) {
+            //     header("Location: ".AppUtil::url(['ctl' => 'dashboard'])); die();
+            // }
+            // // Nếu là user thì chuyển về trang chủ
+            // if ($_SESSION['user']['role'] == $rolesFlip['user']) {
+            //     header("Location: ".AppUtil::url()); die();
+            // }
+            if (AuthModel::getInstance()->isAdmin()) {
                 header("Location: ".AppUtil::url(['ctl' => 'dashboard'])); die();
             }
-            // Nếu là user thì chuyển về trang chủ
-            if ($_SESSION['user']['role'] == $rolesFlip['user']) {
+            if (AuthModel::getInstance()->isUser()) {
                 header("Location: ".AppUtil::url()); die();
             }
         }
@@ -67,9 +73,7 @@ class AuthController extends MainController {
         }
         $this->display();
     }
-    // public function login() {
-    //     include_once(__DIR__ . '/../views/auth/login.php');
-    // }
+
     public function logout() {
         session_unset();
         session_destroy();

@@ -135,7 +135,7 @@ h1 {
 /* Post list */
 .post-item {
   display: flex;
-  gap: 20px;
+  gap: 2rem;
   border: 1px solid #ddd;
   padding: 15px;
   border-radius: 10px;
