@@ -70,6 +70,13 @@ class AuthController extends MainController {
             } else {
                 $this->errors = ['message' => 'Can not login with your account!'];   
             }
+            $_SESSION['user'] = $auth->getUserInfo();
+            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 'admin') {
+                header("Location: ".AppUtil::url(array('ctl' => 'dashboard')));
+            } else {
+                header("Location: ".AppUtil::url(array('ctl' => 'home')));
+            }
+            return;
         }
         $this->display();
     }

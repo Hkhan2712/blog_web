@@ -45,4 +45,15 @@ class HtmlHelper {
 		}
 		return $cssFiles;
 	}
+	
+	public static function _jsFooter() {
+		global $mediaFiles;
+		$jsFiles = "";
+		if(isset($mediaFiles['js']) && count($mediaFiles['js'])) {
+			foreach( $mediaFiles['js'] as $js) {
+				$jsFiles .= '<script src="'.$js.'"></script>';
+			}
+		}
+		return $jsFiles;
+	}
 }

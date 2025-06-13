@@ -83,4 +83,8 @@ class AuthModel extends MainModel {
     public function getUserAvatar() {
         return isset($_SESSION['user']['avatar']) ? $_SESSION['user']['avatar'] : null;
     }
+    public function getUserInfo() {
+        $um = new UserModel();
+        return $um->profile();
+    }
 }

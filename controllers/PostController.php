@@ -45,7 +45,6 @@ class PostController extends MainController
         }
         $this->display(); // views/post/add.php
     }
-
     public function del($id) {
 
     }
