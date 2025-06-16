@@ -19,7 +19,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-            <a href="" class="navbar-brand"><span class="navbar-brand__head">M</span>Blog</a>
+            <a href="<?= AppUtil::url(['ctl' => 'home']) ?>" class="navbar-brand"><span class="navbar-brand__head">M</span>Blog</a>
             <ul class="navbar-nav mr-auto d-flex gap-3">
                 <li class="nav-item active">
                     <a class="nav-link" href="<?php echo AppUtil::url(array('ctl'=>'home'))?>">Home</a>
@@ -52,10 +52,14 @@
                     </svg>
                 </a>
                 <a href="<?php echo AppUtil::url(['ctl' => 'profile']); ?>" class="link-account">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="link-bell bi bi-person-circle" viewBox="0 0 16 16">
-                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                    <?php if (isset($_SESSION['user']['avatar_url']) && $_SESSION['user']['avatar_url']): ?>
+                        <img src="<?= RootREL . "media/uploads/users/" . $_SESSION['user']['avatar_url'] ?>" alt="Avatar" class="rounded-circle" width="30" height="30">
+                    <?php else: ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="link-bell bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                         <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
                     </svg>
+                    <?php endif; ?>
                 </a>
                 <a href="<?php echo AppUtil::url(['ctl' => 'auth', 'act' => 'logout']); ?>" class="btn btn-danger border-0">Logout</a>
                 <?php else: ?>

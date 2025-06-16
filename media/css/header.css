@@ -22,8 +22,13 @@
 .btn-primary:hover {
     opacity: 0.8;
 }
+.btn:hover {
+    background-color: #228B22;
+    color: white;
+}
 .btn:hover svg {
-    transform: translateX(5px);
+    color: white;
+    transform: scale(1.2);
     transition: ease-in-out 0.3s;
 }
 

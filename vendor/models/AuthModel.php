@@ -48,7 +48,7 @@ class AuthModel extends MainModel {
         $um = new UserModel();
         $user['username'] = isset($user['username']) ? $user['username'] : '';
         $user['email'] = isset($user['email']) ? $user['email'] : '';
-        $user['password_hash'] = AppUtil::generatePassword($user['password_hash']);
+        $user['password'] = AppUtil::generatePassword($user['password']);
         $user['status'] = 1; // Mặc định là active
         return $um->addRecord($user);
     }
@@ -84,7 +84,13 @@ class AuthModel extends MainModel {
         return isset($_SESSION['user']['avatar']) ? $_SESSION['user']['avatar'] : null;
     }
     public function getUserInfo() {
-        $um = new UserModel();
-        return $um->profile();
+        if (!isset($_SESSION['user']['email'])) {
+            return null;
+        }
+        $m = new UserModel();
+        return $m->getRecordWhere([
+            'email' => $_SESSION['user']['email'],
+            'status' => 1
+        ]);
     }
 }

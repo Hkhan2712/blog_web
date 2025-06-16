@@ -1,7 +1,7 @@
 <footer class="container"> 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 pt-5 my-5 border-top"> 
         <div class="col mb-3"> 
-            <a href="" class="navbar-brand"><span class="navbar-brand__head">M</span>Blog</a>
+            <a href="<?= AppUtil::url(['ctl' => 'home'])?>" class="navbar-brand"><span class="navbar-brand__head">M</span>Blog</a>
             <p class="text-body-secondary">TechInsights Blog provides expert analysis and practical tips on the latest advancements in technology, from AI to web development.</p> 
         </div> 
         <div class="col mb-3"></div> 
@@ -9,7 +9,7 @@
             <h5>Navigate</h5> 
             <ul class="nav flex-column"> 
                 <li class="nav-item mb-2">
-                    <a href="#" class="nav-link p-0">Blog</a>
+                    <a href="<?= AppUtil::url(['ctl' => 'post'])?>" class="nav-link p-0">Blog</a>
                 </li> 
                 <li class="nav-item mb-2">
                     <a href="#" class="nav-link p-0">Archives</a>

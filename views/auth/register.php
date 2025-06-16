@@ -48,7 +48,7 @@
                                 <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                                 <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                     <label class="form-label" for="password">Password</label>
-                                    <input type="password" id="password" class="form-control" name="password_hash"/>
+                                    <input type="password" id="password" class="form-control" name="password"/>
                                 </div>
                             </div>
                             <div class="d-flex flex-row align-items-center mb-4">

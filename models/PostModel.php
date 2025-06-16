@@ -1,6 +1,6 @@
 <?php
 class PostModel extends FrapModel {
-    public $nopp = 20;
+    public $nopp = 10;
     public static $status = [
         0 => 'draft',
         1 => 'published',
@@ -42,8 +42,8 @@ class PostModel extends FrapModel {
         return $result->fetch_assoc();
     }
 
-    public function getNewestPost($limit = 10) {
-        $limit = (int)$limit;
+    public function getNewestPost($nopp) {
+        $limit = (int)$nopp;
         $sql = "SELECT 
                     posts.*, 
                     users.username AS author_name,
@@ -58,7 +58,8 @@ class PostModel extends FrapModel {
         return $this->con->query($sql);
     }
 
-    public function getListPosts($limit = 20, $offset = 0) {
+    public function getListPosts($limit = 10, $offset = 0) {
+        $limit = $nopp;
         $sql = "SELECT 
             posts.*, 
             users.username AS author_name,
@@ -87,5 +88,13 @@ class PostModel extends FrapModel {
                 GROUP BY posts.id";
         
         return $this->con->query($sql)->fetch_assoc();
+    }
+
+    public function hasUserLiked($postId, $userId) {
+        $postId = (int)$postId;
+        $userId = (int)$userId;
+        $sql = "SELECT id FROM likes WHERE entity_id = $postId AND user_id = $userId AND entity_type = 'post' LIMIT 1";
+        $result = mysqli_query($this->con, $sql);
+        return mysqli_num_rows($result) > 0;
     }
 }

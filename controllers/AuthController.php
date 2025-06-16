@@ -62,21 +62,21 @@ class AuthController extends MainController {
             }
             $user = [
                 'email' => $email,
-                'password_hash' => $password,
+                'password' => $password,
             ];
             $auth = AuthModel::getInstance();
             if ($auth->login($user)) {
-                header("Location: ".AppUtil::url(array('ctl' => 'home')));
+                $_SESSION['user'] = $auth->getUserInfo();
+                if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 'admin') {
+                    header("Location: ".AppUtil::url(array('ctl' => 'dashboard')));
+                    exit;
+                } else {
+                    header("Location: ".AppUtil::url(array('ctl' => 'home')));
+                    exit;
+                }
             } else {
-                $this->errors = ['message' => 'Can not login with your account!'];   
+                $this->errors = ['message' => 'Can not login with your account!'];
             }
-            $_SESSION['user'] = $auth->getUserInfo();
-            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] == 'admin') {
-                header("Location: ".AppUtil::url(array('ctl' => 'dashboard')));
-            } else {
-                header("Location: ".AppUtil::url(array('ctl' => 'home')));
-            }
-            return;
         }
         $this->display();
     }
@@ -100,7 +100,7 @@ class AuthController extends MainController {
                 $this->display(); 
                 return;
             }
-            $password = $_POST['password_hash'];
+            $password = $_POST['password'];
             if (empty($password)) {
                 $this->errors = ['message' => 'Password can not be empty!'];
                 $this->display(); 
@@ -109,10 +109,10 @@ class AuthController extends MainController {
             $user = [
                 'username' => $username,
                 'email' => $email,
-                'password_hash' => $password,
+                'password' => $password,
             ];
 
-            if ($_POST['password_hash'] != $_POST['repeat_password']) {
+            if ($_POST['password'] != $_POST['repeat_password']) {
                 $this->errors = ['message' => 'Passwords do not match!'];
                 $this->display(); 
                 return;

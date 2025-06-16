@@ -156,44 +156,49 @@ class CrudModel extends MainModel {
     
     public function addRecord($datas) {
         global $app;
-        $fields = $values = '';
-        $i = 0;
+
+        $fields = [];
+        $values = [];
+
         foreach ($datas as $k => $v) {
             if (is_string($v)) {
                 $v = mysqli_real_escape_string($this->con, $v);
             }
+            $fields[] = $k;
+            $values[] = "'".$v."'";
+        }
 
-            if ($i) {
-                $fields .= ',';
-                $values .= ',';
-            }
-            $fields .= $k;
-            $values .= "'".$v."'";
-            $i++;
+        if (isset($app['recordTime']['created'])) {
+            $createdTime = $this->recordTime($app['recordTime']['created']) ?? date('Y-m-d H:i:s');
+            $createdTime = trim($createdTime, '"'); // loại bỏ dấu nháy kép nếu có
+            $fields[] = $app['recordTime']['created'];
+            $values[] = "'".$createdTime."'";
         }
-        if(isset($app['recordTime']['created']) && $createdTime = $this->recordTime($app['recordTime']['created'])) {
-        $fields .= ','.$app['recordTime']['created'];
-        $values .= ','.$createdTime;
+
+        if (isset($app['recordTime']['updated'])) {
+            $updatedTime = $this->recordTime($app['recordTime']['updated']) ?? date('Y-m-d H:i:s');
+            $updatedTime = trim($updatedTime, '"'); // loại bỏ dấu nháy kép nếu có
+            $fields[] = $app['recordTime']['updated'];
+            $values[] = "'".$updatedTime."'";
         }
-        // Thêm updated_at nếu có trong cấu hình
-        if(isset($app['recordTime']['updated']) && $updatedTime = $this->recordTime($app['recordTime']['updated'])) {
-            $fields .= ','.$app['recordTime']['updated'];
-            $values .= ','.$updatedTime;
+
+
+        $fieldStr = implode(',', $fields);
+        $valueStr = implode(',', $values);
+        $query = "INSERT INTO {$this->table} ($fieldStr) VALUES ($valueStr)";
+
+        if (mysqli_query($this->con, $query)) {
+            return mysqli_insert_id($this->con);
+        } else {
+            $this->errors['type'] = 'database';
+            $this->errors['message'] = mysqli_error($this->con);
+            return false;
         }
-		$query = "INSERT INTO $this->table($fields) VALUES ($values)";
-        echo $query;
-		if(mysqli_query($this->con,$query)){
-			return $this->con->insert_id;
-		}
-		else {
-			$this->errors['type']		=	'database';
-			$this->errors['message'] 	= mysqli_error($this->con);
-			return false;
-		}
     }
 
     public function editRecord($id, $datas, $conditions = null) {
         global $app;
+        $timeColumn = $app['recordTime']['updatedTime'] ?? null;
         if (is_array($id)) {
             $id = array_key_exists('id', $id) ? $id['id'] : $id[1];
         }    
@@ -209,8 +214,10 @@ class CrudModel extends MainModel {
             $setDatas .= $k. "='".$v."'";
             $i++;
         }
-        if ($updatedTime = $this->recordTime($app['recordTime']['updatedTime'])) {
-            $setDatas .= ','.$app['recordTime']['updatedTime'].'='.$updatedTime;
+
+        if ($timeColumn) {
+            $updatedTime = $this->recordTime($timeColumn) ?? date('Y-m-d H:i:s');
+            $setDatas .= ',' . $timeColumn . "='" . $updatedTime . "'";
         }
         if ($conditions) $conditions = ' and '.$conditions;
         $query = "UPDATE $this->table SET $setDatas where id ='$id'".$conditions;

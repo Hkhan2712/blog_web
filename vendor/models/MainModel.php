@@ -149,28 +149,35 @@ class MainModel {
 
     public function getRecord($id, $fields = '*', $options = null) {
         if (is_array($id)) {
-            $id = array_key_exists('id', $id) ? $id['id'] : $id[1];
+            if (array_key_exists('id', $id)) {
+                $id = $id['id'];
+                $id = HtmlHelper::processSQLString($id);
+                if ($id) $options = $this->addIDCondition($id, $options);
+            } else {
+                if (!isset($options['conditions'])) $options['conditions'] = $id;
+            }
+        } else {
+            $id = HtmlHelper::processSQLString($id);
+            if ($id) $options = $this->addIDCondition($id, $options);
         }
-        $id = HtmlHelper::processSQLString($id);
-        if ($id) $options = $this->addIDCondition($id, $options);
         return $this->getDetailRecord($fields, $options);
     }
 
-    public function getRecordWhere($wheres, $fields = '*', $options = null) {
-        if (isset($options['conditions'])) {
-            if (is_array($options['conditions'])) {
-                $options['conditions'] = array_merge($options['options'], $wheres);
-            } else {
-                $i = 0;
-                foreach ($wheres as $k => $v) {
-                    $field = (strpos($k, '.') === false && isset($this->table)) ? $this->table.'.'.$k : $k;
-                    $options['conditions'] .= (($i) ? " AND ":""). $field."='".$v."'";
-                    $i++;
+    public function getRecordWhere($wheres, $fields='*', $options=null) {
+		if (isset($options['conditions'])) {
+            if(is_array($options['conditions'])) {
+                $options['conditions'] = array_merge($options['conditions'], $wheres);
+                } else {
+                    $i=0;
+                    foreach ($wheres as $key => $value) {
+                        $field = (strpos($key,'.')===false && isset($this->table))? $this->table.'.'.$key: $key;
+                        $options['conditions'] .= (($i)? " AND ":""). $field."='".$value."'";
+                        $i++;
+                    }
                 }
-            }
-        } else $options['conditions'] = $wheres;
-        return $this->getDetailRecord($fields, $options);
-    }
+		} else $options['conditions'] = $wheres;
+		return $this->getDetailRecord($fields, $options);
+	}
 
     public function getCountWhere($wheres) {
         $sql = "COUNT(*) AS total FROM {$this->table} WHERE ";
@@ -188,28 +195,28 @@ class MainModel {
         return $rows;
     }
 
-    public function getDetailRecord($fields = '*', $options = null) {
-        $join = '';
-        $opConditions = (isset($options['conditions']) && $options['conditions']) ? $options['conditions'] : '';
-        if (isset($this->relationships) && (isset($options['joins']) && $options['joins'])) {
-            $joinFields = "";
-            foreach ($this->relationships as $k => $rv) {
-                if (!AppUtil::isMultiArray($rv)) {
-                    $vtmp = $rv;
-                    $rv = [];
-                    $rv[] = $vtmp;
-                }
-                foreach ($rv as $v) {
-                    if (isset($options['joins']) && !in_array($v[0], $options['joins']))
-                        continue;
-                    $joinTable = NounUtils::pluralize($v[0]);
-                    $joinTableFields = $this->getAllFieldsOfTable($joinTable);
-                    if ($k == "belongTo") {
-                        foreach ($joinTableFields as $field) {
-                            $joinFields .= ", ".$joinTable.".".$fields." as ".$joinTable."_".$field;
-                        }
-                        $join .= " LEFT JOIN ".$joinTable." ON ".$this->table.".".$v['key']."=".$joinTable.".id ";
-                    } else if($k=="hasMany" && ((isset($options['get-child']) && $options['get-child']) || isset($options['group']))){
+    public function getDetailRecord($fields='*', $options=null) {
+		$join = '';
+		$opConditions = (isset($options['conditions']) && $options['conditions'])? $options['conditions']: '';
+		if(isset($this->relationships) && (isset($options['joins']) && $options['joins'])) {
+			$joinFields = "";
+			foreach($this->relationships as $k=>$rv) {
+				if(!AppUtil::isMultiArray($rv)) {
+					$vtmp = $rv;
+					$rv = [];
+					$rv[] = $vtmp;
+				}
+				foreach($rv as $v) {
+					if(isset($options['joins']) && !in_array($v[0],$options['joins']))
+						continue;
+					$joinTable = NounUtils::pluralize($v[0]);
+					$joinTableFields = $this->getAllFieldsOfTable($joinTable);
+					if($k=="belongTo") {
+						foreach ($joinTableFields as $field) {
+							$joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
+						}
+						$join .= " LEFT JOIN ".$joinTable." ON ".$this->table.".".$v['key']."=".$joinTable.".id ";
+					} else if($k=="hasMany" && ((isset($options['get-child']) && $options['get-child']) || isset($options['group']))){
 						if(!isset($options['group'])) {
 							foreach ($joinTableFields as $field) {
 								$joinFields .= ", ".$joinTable.".".$field." as ".$joinTable."_".$field;
@@ -217,40 +224,35 @@ class MainModel {
 						}
 						$join .= " RIGHT JOIN ".$joinTable." ON ".$this->table.".id=".$joinTable.".".$v['key']." ";
 					}
-                }
-            }
-            if ($joinFields) $fields = $this->table.'.'.$fields.$joinFields;
-            $joinConditions = $this->conditionsJoin($opConditions);
-        }
-        $conditions = is_array($opConditions) ? $this->conditionsJoin($opConditions) : ($joinConditions ?? $opConditions);
-        $conditions = trim($conditions); // thêm dòng này để tránh lỗi do khoảng trắng
+				}
+			}
+			// Check if $fields has $this->table ?
+			if($joinFields)	$fields = $this->table.'.'.$fields.$joinFields;
+			$joinConditions = $this->conditionsJoin($opConditions);
+		}
+		$conditions = is_array($opConditions)? $this->conditionsJoin($opConditions)	: ($joinConditions?? $opConditions);
+		$conditions = "WHERE ". $conditions;
 
-        if (!empty($conditions)) {
-            $conditions = "WHERE " . $conditions;
-        } else {
-            $conditions = ''; // không có điều kiện thì bỏ WHERE
-        }
+		/* Becaful with group */
+		$group = "";
+		if(isset($options['group'])) {
+			$group = "GROUP BY ";
+			if (strpos($options['group'], '.') !== false) {
+				$group .= $options['group'];
+			} else 	$group .= $this->table.".".$options['group'];
+		}
 
+		$order = (isset($options['order']))? "ORDER BY ".$options['order']:'';
 
-        $group = "";
-        if (isset($options['group'])) {
-            $group = "GROUP BY ";
-            if (strpos($options['group'], '.') !== false) {
-                $group .= $options['group'];
-            } else $group .= $this->table.".".$options['group'];
-        }
+		$limit = (isset($options['limit']) && $options['limit'])? "LIMIT ".$options['limit']:"";
 
-        $order = (isset($options['order'])) ? "ORDER BY ".$options['order'] : '';
-
-        $limit = (isset($options['limit'])) ? "LIMIT ".$options['limit'] : "";
-
-        $sql = "SELECT $fields FROM $this->table $join $conditions $group $order $limit";
-        $result = $this->con->query($sql);
-        if ($result) {
-            $record = $result->fetch_assoc();
-        } else $record = false;
-        return $record;
-    }
+		$sql = "SELECT $fields FROM $this->table $join $conditions $group $order $limit";
+		$result = $this->con->query($sql);
+		if($result) {
+			$record = $result->fetch_assoc();
+		} else $record=false;
+		return $record;
+	}
 
     public function delRecordByCond($conditions = null) {
         if ($conditions) {
@@ -293,6 +295,44 @@ class MainModel {
         }
     }
 
+    // protected function conditionsJoin($conditions, $table = null) {
+    //     if (!$table) $table = $this->table;
+    //     $rs = '';
+    //     if (is_array($conditions)) {
+    //         $i = 0;
+    //         foreach ($conditions as $k => $v) {
+    //             if (is_array($v)) {
+    //                 if (isset($v['logicalOp'])) $rs .= $v['logicalOp']." ";
+    //                 if (ArUtil::isMultiArray($v)) {
+    //                     $rs .= "(".$this->conditionsJoin($v).")";
+    //                 } else {
+    //                     $rs .= $table.".".$v['field']." ".$v['comparisonOp']." '".$v['value']."'";
+    //                 }
+    //                 $i++;
+    //             }
+    //         }
+    //     } else {
+    //         $arrOps = ['AND', 'OR', 'NOT', '('];
+    //         $j = 0;
+    //         $arr = explode(" ", $conditions);
+    //         foreach ($arr as $v) {
+    //             if (strpos($v, $this->table.'.') === false) {
+    //                 if (strpos($v, '(') !== false) 
+    //                     $rs .= ($j ? " " : "").str_replace('(', '('.$table.'.', $v);
+    //                 else {
+    //                     if ($j) {
+    //                         $rs .= " ".(in_array(strtoupper($arr[$j-1]), $arrOps) ? $table.'.'.$v : $v);
+    //                     } else 
+    //                         $rs .= $table.'.'.$v;
+    //                 }
+    //             } else {
+    //                 $rs .= ($j ? " " : ""). $v;
+    //             }
+    //             $j++;
+    //         }
+    //     }
+    //     return $rs;
+    // }
     protected function conditionsJoin($conditions, $table = null) {
         if (!$table) $table = $this->table;
         $rs = '';
@@ -306,6 +346,9 @@ class MainModel {
                     } else {
                         $rs .= $table.".".$v['field']." ".$v['comparisonOp']." '".$v['value']."'";
                     }
+                } else {
+                    $field = (strpos($k, '.') === false) ? $table.'.'.$k : $k;
+                    $rs .= ($i ? " AND " : "") . $field . "='" . $v . "'";
                     $i++;
                 }
             }
@@ -331,6 +374,7 @@ class MainModel {
         }
         return $rs;
     }
+
     protected function addIDCondition($id, $options = null) {
         if (isset($options['conditions']) && is_array($options['conditions'])) {
             array_unshift($options['conditions'], ['id', ]);

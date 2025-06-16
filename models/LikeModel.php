@@ -31,4 +31,14 @@ class LikeModel extends CrudModel {
             'entity_type' => $entityType
         ]);
     }
+    public function countLikesForPost($postId)
+    {
+        $sql = "SELECT COUNT(1) as total FROM $this->table WHERE entity_id = ? AND entity_type = 'post'";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("i", $postId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return (int)$row['total'];
+    }
 }
