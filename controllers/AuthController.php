@@ -47,6 +47,7 @@ class AuthController extends MainController {
         $this->display();
     }
     public function login() {
+        global $app;
         if (isset($_POST['btn_submit'])) {
             $email = $_POST['email'];
             $password = $_POST['password'];

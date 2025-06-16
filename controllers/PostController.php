@@ -4,12 +4,22 @@ class PostController extends MainController
     protected $errors = false;
     protected $listPosts;
     protected $record;
-    protected $isLiked = false; 
+    protected $isLiked = false;
+    protected $isLikedCm = false; 
     protected $comments = [];
+    protected $totalPages = 1;
+    protected $currentPage = 1;
     public function index()
     {
         $m = PostModel::getInstance();
-        $this->listPosts = $m->getListPosts();
+        $limit = 10;
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $offset = ($page -1) * $limit;
+
+        $totalPosts = $m->countAllPosts();
+        $this->totalPages = ceil($totalPosts / $limit);
+        $this->currentPage = $page;
+        $this->listPosts = $m->getListPostsPaginate($limit, $offset);
         $this->display();
     }
 
@@ -18,16 +28,25 @@ class PostController extends MainController
         $id = (int)$id[1];
         $pm = PostModel::getInstance();
         $cm = CommentModel::getInstance();
+
         $this->record = $pm->getPostById($id);
         $this->comments = $cm->getCommentsByPostId($id);
-        // Kiểm tra xem user đã like chưa
-        $userId = $_SESSION['user']['id'] ?? 0;
-        $this->isLiked = false;
-        if ($userId) {
-            $this->isLiked = $pm->hasUserLiked($id, $userId);
+
+        if ($this->comments instanceof Traversable) {
+            $this->comments = iterator_to_array($this->comments);
         }
 
-        $this->display(); // views/post/view.php
+        $userId = $_SESSION['user']['id'] ?? 0;
+
+        if ($userId) {
+            $this->isLiked = $pm->hasUserLiked($id, $userId);
+            foreach ($this->comments as $k => $comment) {
+                $comment['is_liked'] = $cm->hasUserLikedCm($comment['id'], $userId);
+                $this->comments[$k] = $comment;
+            }
+        }
+
+        $this->display();
     }
 
     

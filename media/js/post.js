@@ -57,7 +57,9 @@ function createCommentElement(comment) {
                     <p>${comment.content}</p>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-secondary">Reply</button>
-                        <button class="btn btn-sm btn-outline-secondary">Like</button>
+                        <button class="btn btn-sm btn-outline-secondary" id="like-comment-${comment.id}" onclick="likeComment(${comment.id})">
+                            Like
+                        </button>
                     </div>
                 </div>
             </div>
@@ -83,4 +85,93 @@ async function commentPost(postId) {
     } else {
         alert('Error when sending comment: ' + (data?.message || 'Unknown error.'));
     }
+}
+function updateCommentLikeButton(commentId) {
+    const btn = document.getElementById(`like-comment-${commentId}`);
+    if (btn) {
+        btn.classList.replace('btn-outline-secondary', 'btn-primary');
+        btn.disabled = true;
+    }
+}
+async function likeComment(commentId) {
+    const { ok, data } = await sendPostRequest(likeCmUrl, { commentId });
+
+    if (ok && data?.success) {
+        updateCommentLikeButton(commentId);
+    } else {
+        alert('Error when liking comment: ' + (data?.message || 'Unknown error.'));
+    }
+}
+function showReplyForm(commentId) {
+    const repliesContainer = document.getElementById('replies-' + commentId);
+    if (repliesContainer.querySelector('.reply-form')) return;
+    const form = document.createElement('div');
+    form.classList.add('reply-form', 'mt-2');
+
+    form.innerHTML = `
+        <form onsubmit="return false;" class="d-flex gap-2" id="reply-form-${commentId}">
+            <input type="hidden" name="parent_id" value="${commentId}">
+            <input type="hidden" name="post_id" value="<?= $this->record['id'] ?>">
+            <textarea name="content" rows="1" class="form-control" placeholder="Write a reply..." required></textarea>
+            <button type="button" class="btn btn-primary btn-sm" onclick="submitReply(${commentId})">Reply</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="this.closest('.reply-form').remove()">Cancel</button>
+        </form>
+    `;
+    repliesContainer.prepend(form);
+}
+function submitReply(commentId, postId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    const formData = new FormData(form);
+    formData.append("parent_id", commentId);
+    formData.append("post_id", postId);
+
+    fetch("<?= AppUtil::url(['ctl' => 'comment', 'act' => 'reply']) ?>", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+            return response.json();
+        } else {
+            return response.text().then(text => {throw new Error("Non JSON response: " + text)});
+        }
+    })
+    .then(data => {
+        if (data.success) {
+            const reply = `
+                <div class="comment-item ms-5 mb-2">
+                    <div class="d-flex gap-2 align-items-start">
+                        <div class="avatar">
+                            <img src="${data.avatar_url}" alt="" class="rounded-circle" width="25" height="25">
+                        </div>
+                        <div class="comment-content flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="m-0">${data.author_name}</h6>
+                                <small class="text-muted">${data.created_at}</small>
+                            </div>
+                            <p>${escapeHTML(formData.get('content'))}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            form.insertAdjacentHTML('beforebegin', reply);
+            form.closest('.reply-form').remove();
+        } else {
+            alert(data.message || "Failed to add reply.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("An error occurred!");
+    });
+}
+
+function escapeHTML(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

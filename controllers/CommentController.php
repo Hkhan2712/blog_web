@@ -38,4 +38,47 @@ class CommentController extends MainController {
             echo json_encode(['success' => false, 'message' => 'Failed to add comment.']);
         }
     }
+
+    public function reply() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user'])) {
+            $parentId = intval($_POST['parent_id'] ?? 0);
+            $postId = intval($_POST['post_id'] ?? 0);
+            $content = trim($_POST['content'] ?? '');
+            if ($parentId && $postId && $content) {
+                $cm = CommentModel::getInstance();
+                
+                $cm->addRecord([
+                'post_id' => $postId,
+                'parent_id' => $parentId,
+                'user_id' => $_SESSION['user']['id'],
+                'content' => $content
+                ]);
+                $commentId = $cm->getIdLastRecord();
+                if ($parentId) {
+                    $parent = $cm->getRecordsWhere($parentId);
+                    if ($parent) {
+                        $path = $parent['path'] . '/'.$commentId;
+                    } else {
+                        $path = $commentId;
+                    }
+                }
+                $cm->updatePath($commentId, $path);
+                echo json_encode([
+                    'success' => true,
+                    'id' => $commentId,
+                    'path' => $path,
+                    'created_at' => date('F d, Y'),
+                    'author_name' => htmlspecialchars($_SESSION['user']['username'] ?? 'You'),
+                    'avatar_url' => !empty($_SESSION['user']['avatar_url']) 
+                        ? RootREL . "media/uploads/users/" . $_SESSION['user']['avatar_url'] 
+                        : RootREL . "media/uploads/users/avatar-default.png"
+                ]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Missing data']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        }
+    }
 }

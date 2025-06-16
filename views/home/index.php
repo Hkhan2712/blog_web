@@ -95,11 +95,18 @@
                     $tags = array_map('trim', explode(',', $post['tags']));
                 }
             ?>
-                <div class="post-item d-flex" style="min-height: 284.79px;">
+                <div class="post-item d-flex" style="max-height: 284.79px;">
                     <div class="post-thumb">
                         <img src="<?=RootREL."media/uploads/posts/".$post['image_url']?>" alt="">
                     </div>
                     <div class="post-content">
+                        <p class="detail">
+                            <?=$post['author_name']?> 
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dot" viewBox="0 0 16 16">
+                                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
+                            </svg>
+                            <?=date("F d Y", strtotime($post['created_at']))?>
+                        </p>
                         <div class="tags">
                             <?php foreach ($tags as $tag): ?>
                                 <span class="tag"><?= htmlspecialchars($tag) ?></span>
@@ -114,25 +121,6 @@
                 </div>
             <?php endforeach; ?>
         </div> 
-        <nav aria-label="Posts navigation" class = "pt-2">
-            <ul class="pagination">
-                <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="sr-only"></span>
-                </a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="sr-only"></span>
-                </a>
-                </li>
-            </ul>
-        </nav>
     </div>
 </section>
 <section class="bg-dark" style="margin-top: 120px;">

@@ -35,23 +35,23 @@
             </div>
         <?php endforeach; ?>
     </div>
-<div class="clearfix">
-        <nav aria-label="Posts navigation" class = "pt-2">
+    <div class="clearfix">
+        <nav aria-label="Posts navigation" class="pt-2">
             <ul class="d-flex justify-content-center pagination">
-                <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="sr-only"></span>
-                </a>
+                <li class="page-item <?= ($this->currentPage <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="<?= ($this->currentPage <= 1) ? '#' : '?page=' . ($this->currentPage - 1) ?>" aria-label="Previous">
+                        &laquo;
+                    </a>
                 </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="sr-only"></span>
-                </a>
+                <?php for ($i = 1; $i <= $this->totalPages; $i++): ?>
+                    <li class="page-item <?= ($i == $this->currentPage) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?= ($this->currentPage >= $this->totalPages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="<?= ($this->currentPage >= $this->totalPages) ? '#' : '?page=' . ($this->currentPage + 1) ?>" aria-label="Next">
+                        &raquo;
+                    </a>
                 </li>
             </ul>
         </nav>

@@ -64,10 +64,26 @@ class CommentModel extends CrudModel {
         $row = $result->fetch_assoc();
         return (int)$row['total'];
     }
+    public function hasUserLikedCm($commentId, $userId)
+    {
+        $sql = "SELECT COUNT(1) FROM likes WHERE entity_type = 'comment' AND entity_id = ? AND user_id = ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("ii", $commentId, $userId);
+        $count = $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        return $count > 0;
+    }
     private function incrementCommentQuantity($postId) {
         $sql = "UPDATE posts SET comment_quantity = comment_quantity + 1 WHERE id = ?";
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param("i", $postId);
+        $stmt->execute();
+    }
+    public function updatePath($commentId, $path) {
+        $sql = "UPDATE comments set path = ? where id = $commentId";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param('i', $path);
         $stmt->execute();
     }
 }

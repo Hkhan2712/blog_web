@@ -3,6 +3,9 @@ h1 {
     font-weight: 700;
     line-height: 1.5;
 }
+h5 {
+    font-size: 1rem;
+}
 .pt-120 {
     padding: 120px 0 4.5rem 0;
 }
@@ -26,7 +29,7 @@ h1 {
   bottom: 0;
   left: 0;
   color: white;
-  background-color: rgba(0, 0, 0, 0.5); /* nền tối trong suốt để dễ đọc */
+  background-color: rgba(0, 0, 0, 0.5); 
   padding: 10px;
   border-radius: 8px;
 }
@@ -86,11 +89,12 @@ h1 {
 }
 .intro-list img {
     border-radius: 0.25rem;
+    height: 100%;
 }
 .post-item:hover .h4 {
     color: #228B22;
 }
-/* categories card */
+
 .category-card {
     position: relative;
     overflow: hidden;
@@ -132,7 +136,9 @@ h1 {
 .page-link {
     color: #228B22;
 }
-/* Post list */
+.page-link:hover {
+    color: #fff;
+}
 .post-item {
   display: flex;
   gap: 2rem;
@@ -165,5 +171,14 @@ h1 {
     border-color: #228B22;
     background-color:#228B22;
     color: #fff;
+}
+.page-item.active {
+    background-color: #228B22 !important;
+}
+.active >.page-link, .page-link.active {
+    background-color: #228B22;
+    color: #fff;
+    z-index: inherit;
+    border-color: #228B22;
 }
 

@@ -28,7 +28,40 @@
                     <a class="nav-link" href="<?php echo AppUtil::url(['ctl'=>'post'])?>">Blog</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Creators</a>
+                    <a class="nav-link" href="#">Creator</a>
+                </li>
+                <li class="nav-item dropdown position-static">
+                    <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                        Categories
+                    </a>
+                    <div class="dropdown-menu w-100 p-4" style="max-width: 900px;">
+                        <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="fw-bold">Technology</h6>
+                            <ul class="list-unstyled">
+                            <li><a class="dropdown-item" href="#">AI</a></li>
+                            <li><a class="dropdown-item" href="#">Web Dev</a></li>
+                            <li><a class="dropdown-item" href="#">Gadgets</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold">Entertainment</h6>
+                            <ul class="list-unstyled">
+                            <li><a class="dropdown-item" href="#">Movies</a></li>
+                            <li><a class="dropdown-item" href="#">Music</a></li>
+                            <li><a class="dropdown-item" href="#">Celebrities</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold">Travel</h6>
+                            <ul class="list-unstyled">
+                            <li><a class="dropdown-item" href="#">Guides</a></li>
+                            <li><a class="dropdown-item" href="#">Experiences</a></li>
+                            <li><a class="dropdown-item" href="#">Hotels</a></li>
+                            </ul>
+                        </div>
+                        </div>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Comunity</a>

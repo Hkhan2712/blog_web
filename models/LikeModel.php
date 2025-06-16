@@ -17,7 +17,7 @@ class LikeModel extends CrudModel {
         ];
     }
 
-    public function likePost($userId, $entityId, $entityType = 'post') {
+    public function like($userId, $entityId, $entityType = 'post') {
         // Check if the user has already liked the post
         $existingLike = $this->getRecord(['user_id' => $userId, 'entity_id' => $entityId, 'entity_type' => $entityType]);
         if ($existingLike) {
@@ -36,6 +36,15 @@ class LikeModel extends CrudModel {
         $sql = "SELECT COUNT(1) as total FROM $this->table WHERE entity_id = ? AND entity_type = 'post'";
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param("i", $postId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return (int)$row['total'];
+    }
+    public function countLikesForComment($commentId) {
+        $sql = "SELECT count(1) as total from $this->table where entity_id=? and entity_type='comment'";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("i", $commentId);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();

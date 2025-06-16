@@ -136,7 +136,20 @@ class MainModel {
 		$sql = "SELECT ".$fields." FROM ".$this->table.$join.$conditions.$group.$order.$limit;
 		return $this->con->query($sql);
 	}
-
+    public function getIdLastRecord() {
+        if (!isset($this->table)) {
+            $this->setTableName();
+        }
+        $sql = "SELECT id FROM {$this->table}";
+        $result = $this->con->query($sql);
+        $ids = [];
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $ids[] = $row['id'];
+            }
+        }
+        return $ids;
+    }
     public function getRecordsWhere($wheres, $fields = '*', $options = null) {
         $conditions = " WHERE ";
         $i = 0;

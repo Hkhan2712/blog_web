@@ -42,8 +42,8 @@ class PostModel extends FrapModel {
         return $result->fetch_assoc();
     }
 
-    public function getNewestPost($nopp) {
-        $limit = (int)$nopp;
+    public function getNewestPost($limit) {
+        $limit = $this->nopp;
         $sql = "SELECT 
                     posts.*, 
                     users.username AS author_name,
@@ -59,7 +59,7 @@ class PostModel extends FrapModel {
     }
 
     public function getListPosts($limit = 10, $offset = 0) {
-        $limit = $nopp;
+        $limit = $this->nopp;
         $sql = "SELECT 
             posts.*, 
             users.username AS author_name,
@@ -96,5 +96,24 @@ class PostModel extends FrapModel {
         $sql = "SELECT id FROM likes WHERE entity_id = $postId AND user_id = $userId AND entity_type = 'post' LIMIT 1";
         $result = mysqli_query($this->con, $sql);
         return mysqli_num_rows($result) > 0;
+    }
+
+    public function countAllPosts() {
+        $sql = "SELECT COUNT(1) as total FROM posts";
+        $result = $this->con->query($sql);
+        $row = $result->fetch_assoc();
+        return (int)$row['total'];
+    }
+
+    public function getListPostsPaginate($limit, $offset) {
+        $sql = "SELECT posts.*, users.username AS author_name
+                FROM posts
+                JOIN users ON posts.user_id = users.id
+                ORDER BY posts.created_at DESC
+                LIMIT ? OFFSET ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("ii", $limit, $offset);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 }
