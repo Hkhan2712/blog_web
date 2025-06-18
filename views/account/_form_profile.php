@@ -1,4 +1,4 @@
-<form action="<?= AppUtil::url(['ctl' => 'account', 'act' => 'update']) ?>" 
+<form action="<?= AppUtil::url(['ctl' => 'account', 'act' => 'edit']) ?>" 
       method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
     
     <div class="text-center mb-4">

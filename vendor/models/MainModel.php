@@ -282,32 +282,35 @@ class MainModel {
 
     public function updateWhere($datas, $conditions = null) {
         global $app;
-        $setDatas = '';
-        $i = 0;
+
+        $setParts = [];
         foreach ($datas as $k => $v) {
             if (is_string($v)) {
                 $v = mysqli_real_escape_string($this->con, $v);
             }
-            if ($i) {
-                $setDatas .= ', ';
+            $setParts[] = "$k='$v'";
+        }
+
+        $updatedAtField = $app['recordTime']['updated_at'] ?? 'updated_at';
+        if (!array_key_exists($updatedAtField, $datas)) {
+            if ($updatedTime = $this->recordTime($updatedAtField)) {
+                $setParts[] = "$updatedAtField = $updatedTime";
             }
-            $setDatas .= $k."='".$v."'";
-            $i++;
         }
-        if ($updatedTime = $this->recordTime($app['recordTime']['updated_at'])) {
-            $setDatas .= ','.$app['recordTime']['updated_at'].'='.$updatedTime;
+        $setDatas = implode(", ", $setParts);
+
+        $sql = "UPDATE $this->table SET $setDatas";
+        if ($conditions) {
+            $sql .= " WHERE $conditions";
         }
-        if ($conditions) $conditions = ' and '.$conditions;
-        $sql = "UPDATE $this->table set $setDatas WHERE ".$conditions;
-        if (mysqli_query($this->con, $sql)) 
+        if (mysqli_query($this->con, $sql)) {
             return true;
-        else {
+        } else {
             $this->errors['type'] = 'database';
             $this->errors['message'] = mysqli_error($this->con);
             return false;
         }
     }
-
     // protected function conditionsJoin($conditions, $table = null) {
     //     if (!$table) $table = $this->table;
     //     $rs = '';
