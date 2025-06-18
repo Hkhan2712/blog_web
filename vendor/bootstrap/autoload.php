@@ -15,6 +15,7 @@ spl_autoload_register(function ($classname) {
         RootURI . 'vendor/models/',
         RootURI . 'vendor/validators/',
         RootURI . 'components/SimpleImage/',
+        RootURI . 'middleware/',
     ];
 
     foreach ($baseDirs as $baseDir) {
@@ -75,6 +76,5 @@ spl_autoload_register(function ($classname) {
             return;
         }
     }
-
     error_log("Autoload failed: {$classname} not found.");
 });

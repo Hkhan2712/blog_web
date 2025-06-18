@@ -73,9 +73,53 @@ class PostController extends MainController
                 $this->errors = "Please fill in all required fields.";
             }
         }
-        $this->display(); // views/post/add.php
+        $this->display(); 
     }
-    public function del($id) {
+    public function edit($id) {
+        $id = (int)$id[1];
+        $m = PostModel::getInstance();
+        $this->record = $m->getPostById($id);
 
+        if (!$this->record) {
+            header('HTTP/1.0 404 Not Found');
+            exit('Post not found');
+        }
+
+        if (isset($_POST['btn_submit'])) {
+            $title = trim($_POST['title'] ?? '');
+            $content = trim($_POST['content'] ?? '');
+            $image = $this->record['image_url'];
+
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
+            }
+
+            if ($title && $content) {
+                $m->updateRecord($id, [
+                    'title' => $title,
+                    'content' => $content,
+                    'image_url' => $image,
+                ]);
+                header('Location:' . AppUtil::url(['ctl' => 'post', 'act' => 'view', 'id' => $id]));
+                exit();
+            } else {
+                $this->errors = "Please fill in all required fields.";
+            }
+        }
+        $this->display();
+    } 
+    public function del($id) {
+        $id = (int)$id[1];
+        $m = PostModel::getInstance();
+        $record = $m->getPostById($id);
+
+        if (!$record) {
+            header('HTTP/1.0 404 Not Found');
+            exit('Post not found');
+        }
+
+        $m->delRecord($id);
+        header('Location:' . AppUtil::url(['ctl' => 'post']));
+        exit();
     }
 }

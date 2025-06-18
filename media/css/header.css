@@ -12,9 +12,6 @@
 .navbar-brand__head {
     color: #228B22;
 }
-.btn {
-    border-color: rgba(0, 0, 0, 0.65);
-}
 .btn-primary, .btn:hover{
     border-color: #228B22;
     background-color:#228B22;

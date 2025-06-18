@@ -116,4 +116,11 @@ class PostModel extends FrapModel {
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
+    public function getPostsByUserId($userId) {
+        $sql = "SELECT id, title, `status`, created_at FROM posts where user_id = ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 }
