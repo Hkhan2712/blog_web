@@ -154,44 +154,104 @@ class CrudModel extends MainModel {
             return false;
     }
     
+    // public function addRecord($datas) {
+    //     global $app;
+
+    //     $fields = [];
+    //     $values = [];
+
+    //     foreach ($datas as $k => $v) {
+    //         if (is_string($v)) {
+    //             $v = mysqli_real_escape_string($this->con, $v);
+    //         }
+    //         $fields[] = $k;
+    //         $values[] = "'".$v."'";
+    //     }
+
+    //     if (isset($app['recordTime']['created'])) {
+    //         $createdTime = $this->recordTime($app['recordTime']['created']) ?? date('Y-m-d H:i:s');
+    //         $createdTime = trim($createdTime, '"'); // loại bỏ dấu nháy kép nếu có
+    //         $fields[] = $app['recordTime']['created'];
+    //         $values[] = "'".$createdTime."'";
+    //     }
+
+    //     if (isset($app['recordTime']['updated'])) {
+    //         $updatedTime = $this->recordTime($app['recordTime']['updated']) ?? date('Y-m-d H:i:s');
+    //         $updatedTime = trim($updatedTime, '"'); // loại bỏ dấu nháy kép nếu có
+    //         $fields[] = $app['recordTime']['updated'];
+    //         $values[] = "'".$updatedTime."'";
+    //     }
+
+
+    //     $fieldStr = implode(',', $fields);
+    //     $valueStr = implode(',', $values);
+    //     $query = "INSERT INTO {$this->table} ($fieldStr) VALUES ($valueStr)";
+
+    //     if (mysqli_query($this->con, $query)) {
+    //         return mysqli_insert_id($this->con);
+    //     } else {
+    //         $this->errors['type'] = 'database';
+    //         $this->errors['message'] = mysqli_error($this->con);
+    //         return false;
+    //     }
+    // }
     public function addRecord($datas) {
         global $app;
 
         $fields = [];
+        $placeholders = [];
         $values = [];
+        $types = ''; // s = string, i = integer, d = double
 
         foreach ($datas as $k => $v) {
-            if (is_string($v)) {
-                $v = mysqli_real_escape_string($this->con, $v);
-            }
             $fields[] = $k;
-            $values[] = "'".$v."'";
+            $placeholders[] = '?';
+            if (is_int($v)) {
+                $types .= 'i';
+            } elseif (is_float($v)) {
+                $types .= 'd';
+            } elseif (is_null($v)) {
+                $types .= 's'; // Hoặc xử lý riêng nếu NULL cho chuẩn
+                $v = null;
+            } else {
+                $types .= 's';
+            }
+            $values[] = $v;
         }
 
         if (isset($app['recordTime']['created'])) {
-            $createdTime = $this->recordTime($app['recordTime']['created']) ?? date('Y-m-d H:i:s');
-            $createdTime = trim($createdTime, '"'); // loại bỏ dấu nháy kép nếu có
             $fields[] = $app['recordTime']['created'];
-            $values[] = "'".$createdTime."'";
+            $placeholders[] = '?';
+            $types .= 's';
+            $values[] = date('Y-m-d H:i:s');
         }
 
         if (isset($app['recordTime']['updated'])) {
-            $updatedTime = $this->recordTime($app['recordTime']['updated']) ?? date('Y-m-d H:i:s');
-            $updatedTime = trim($updatedTime, '"'); // loại bỏ dấu nháy kép nếu có
             $fields[] = $app['recordTime']['updated'];
-            $values[] = "'".$updatedTime."'";
+            $placeholders[] = '?';
+            $types .= 's';
+            $values[] = date('Y-m-d H:i:s');
         }
 
-
         $fieldStr = implode(',', $fields);
-        $valueStr = implode(',', $values);
-        $query = "INSERT INTO {$this->table} ($fieldStr) VALUES ($valueStr)";
+        $placeholderStr = implode(',', $placeholders);
 
-        if (mysqli_query($this->con, $query)) {
-            return mysqli_insert_id($this->con);
-        } else {
-            $this->errors['type'] = 'database';
+        $query = "INSERT INTO {$this->table} ($fieldStr) VALUES ($placeholderStr)";
+        $stmt = $this->con->prepare($query);
+
+        if (!$stmt) {
+            $this->errors['type'] = 'prepare';
             $this->errors['message'] = mysqli_error($this->con);
+            return false;
+        }
+
+        $stmt->bind_param($types, ...$values);
+
+        if ($stmt->execute()) {
+            return $this->con->insert_id;
+        } else {
+            $this->errors['type'] = 'execute';
+            $this->errors['message'] = $stmt->error;
             return false;
         }
     }

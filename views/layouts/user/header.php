@@ -11,6 +11,7 @@
     <link rel="stylesheet" href= "<?=RootREL?>media/css/header.css">
     <link rel="stylesheet" href="<?=RootREL?>media/css/footer.css">
     <link rel="stylesheet" href="<?=RootREL?>media/css/main.css">
+    <?php echo HtmlHelper::_cssHeader(); ?>
 </head>
 <body>
 <header>
@@ -101,7 +102,6 @@
                 <?php endif; ?>
         </div>
     </nav>
-
 </header>
 <main>
 

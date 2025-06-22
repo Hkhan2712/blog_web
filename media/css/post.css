@@ -1,0 +1,20 @@
+.post-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.post-card:hover .img-zoom {
+    transform: scale(1.05);
+}
+.post-title-link {
+    color: #000;
+    text-decoration: none;
+    transition: color 0.3s, text-decoration 0.3s;
+}
+.post-card:hover .post-title-link,
+.post-title-link:hover {
+    color: #228B22;
+    text-decoration: underline;
+}

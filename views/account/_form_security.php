@@ -1,4 +1,4 @@
-<form action="<?= AppUtil::url(['ctl' => 'account', 'act' => 'change_password']) ?>" 
+<form action="<?= AppUtil::url(['ctl' => 'account', 'act' => 'edit']) ?>" 
       method="post" class="needs-validation" novalidate>
 
     <div class="mb-3">

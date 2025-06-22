@@ -9,7 +9,7 @@
                 <img src="/media/uploads/users/<?php echo htmlspecialchars($_SESSION['user']['avatar_url']); ?>" 
                      alt="Profile Image" class="rounded-circle border border-2" width="100" height="100">
                 <div class="ms-3">
-                    <h3 class="mb-0"><?= htmlspecialchars($_SESSION['user']['username']); ?></h3>
+                    <h3 class="mb-0"><?= htmlspecialchars($_SESSION['user']['display_name'] ?? $_SESSION['user']['username']) ?></h3>
                     <small class="text-muted"><?= htmlspecialchars($_SESSION['user']['email']); ?></small>
                 </div>
             </div>

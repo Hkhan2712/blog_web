@@ -24,7 +24,6 @@ class CommentModel extends CrudModel {
             'post_id' => $postId,
             'content' => $content,
         ];
-
         $result = $this->addRecord($data);
         if ($result) {
             $this->incrementCommentQuantity($postId);
@@ -37,7 +36,7 @@ class CommentModel extends CrudModel {
         $sql = "SELECT comments.*, users.username AS author_name, users.avatar_url as author_avatar
                 FROM comments 
                 JOIN users ON comments.user_id = users.id 
-                WHERE comments.post_id = ? 
+                WHERE comments.post_id = ? and parent_id is null
                 ORDER BY comments.created_at DESC 
                 LIMIT ?";
         $stmt = $this->con->prepare($sql);
@@ -74,16 +73,41 @@ class CommentModel extends CrudModel {
         $stmt->fetch();
         return $count > 0;
     }
-    private function incrementCommentQuantity($postId) {
+    public function incrementCommentQuantity($postId) {
         $sql = "UPDATE posts SET comment_quantity = comment_quantity + 1 WHERE id = ?";
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param("i", $postId);
         $stmt->execute();
     }
     public function updatePath($commentId, $path) {
-        $sql = "UPDATE comments set path = ? where id = $commentId";
+        $sql = "UPDATE {$this->table} SET path = ? WHERE id = ?";
         $stmt = $this->con->prepare($sql);
-        $stmt->bind_param('i', $path);
+        $stmt->bind_param('si', $path, $commentId);
+        return $stmt->execute();
+    }
+    public function getRepliesWithPagination($parentId, $limit = 5, $offset = 0) {
+        $sql = "SELECT c.*, u.username AS author, u.avatar_url AS avatar
+                FROM {$this->table} c
+                JOIN users u ON c.user_id = u.id
+                WHERE c.parent_id = ?
+                ORDER BY c.created_at ASC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->con->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->con->error);
+        }
+
+        $stmt->bind_param("iii", $parentId, $limit, $offset);
         $stmt->execute();
+
+        $result = $stmt->get_result();
+        $rows = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+
+        $stmt->close();
+        return $rows;
     }
 }

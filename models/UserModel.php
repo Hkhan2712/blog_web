@@ -45,7 +45,23 @@ class UserModel extends FrapModel {
 		$user = (new self)->getRecord($id);
 		return ucfirst($user['firstname'])." ".ucfirst($user['lastname']);
 	}
-
+    public function getUserById($id) {
+        if (!isset($id)) {
+            return null;
+        }
+        $id = (int)$id;
+        $sql = "SELECT * FROM `users` WHERE `id` = ?";
+        $stmt = $this->con->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            $stmt->close();
+            return $user;
+        }
+        return null;
+    }
     public function getTopUser() {
         $rsAll = $this->getAllData();
         $topUser = array();

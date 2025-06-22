@@ -59,7 +59,6 @@ class PostModel extends FrapModel {
     }
 
     public function getListPosts($limit = 10, $offset = 0) {
-        $limit = $this->nopp;
         $sql = "SELECT 
             posts.*, 
             users.username AS author_name,
@@ -120,6 +119,25 @@ class PostModel extends FrapModel {
         $sql = "SELECT id, title, `status`, created_at FROM posts where user_id = ?";
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    public function getRecommendedPosts($excludePostId, $limit = 3) {
+        $sql = "SELECT 
+                    posts.*, 
+                    users.username AS author_name,
+                    GROUP_CONCAT(tags.name SEPARATOR ', ') AS tags
+                FROM posts
+                JOIN users ON posts.user_id = users.id
+                LEFT JOIN post_tags ON posts.id = post_tags.post_id
+                LEFT JOIN tags ON post_tags.tag_id = tags.id
+                WHERE posts.id != ?
+                GROUP BY posts.id
+                ORDER BY posts.created_at DESC
+                LIMIT ?";
+        
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("ii", $excludePostId, $limit);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }

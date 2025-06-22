@@ -9,6 +9,7 @@ class PostController extends MainController
     protected $comments = [];
     protected $totalPages = 1;
     protected $currentPage = 1;
+    protected $recommendedPosts = [];
     public function index()
     {
         $m = PostModel::getInstance();
@@ -30,6 +31,7 @@ class PostController extends MainController
         $cm = CommentModel::getInstance();
 
         $this->record = $pm->getPostById($id);
+        $this->recommendedPosts = $pm->getRecommendedPosts($id);
         $this->comments = $cm->getCommentsByPostId($id);
 
         if ($this->comments instanceof Traversable) {

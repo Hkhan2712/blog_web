@@ -1,3 +1,7 @@
+<?php 
+    global $mediaFiles;
+    array_push($mediaFiles['js'],  RootREL.'media/js/validator.js');
+?>
 <?php include_once "views/layouts/user/header.php"; ?>
 <div class="container my-5" style="max-width: 800px;">
     <div class="card shadow rounded-4 border-0">
@@ -33,5 +37,9 @@
         </div>
     </div>
 </div>
-
+<script>
+    window.APP = {
+        checkExistUrl: "<?= AppUtil::url(['ctl' => 'account', 'act' => 'checkExist']) ?>"
+    };
+</script>
 <?php include_once "views/layouts/user/footer.php"; ?>

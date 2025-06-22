@@ -260,13 +260,12 @@ class MainModel {
 		$limit = (isset($options['limit']) && $options['limit'])? "LIMIT ".$options['limit']:"";
 
 		$sql = "SELECT $fields FROM $this->table $join $conditions $group $order $limit";
-		$result = $this->con->query($sql);
+        $result = $this->con->query($sql);
 		if($result) {
 			$record = $result->fetch_assoc();
 		} else $record=false;
 		return $record;
 	}
-
     public function delRecordByCond($conditions = null) {
         if ($conditions) {
             $sql = "DELETE FROM $this->table WHERE ".$conditions;
@@ -311,86 +310,44 @@ class MainModel {
             return false;
         }
     }
-    // protected function conditionsJoin($conditions, $table = null) {
-    //     if (!$table) $table = $this->table;
-    //     $rs = '';
-    //     if (is_array($conditions)) {
-    //         $i = 0;
-    //         foreach ($conditions as $k => $v) {
-    //             if (is_array($v)) {
-    //                 if (isset($v['logicalOp'])) $rs .= $v['logicalOp']." ";
-    //                 if (ArUtil::isMultiArray($v)) {
-    //                     $rs .= "(".$this->conditionsJoin($v).")";
-    //                 } else {
-    //                     $rs .= $table.".".$v['field']." ".$v['comparisonOp']." '".$v['value']."'";
-    //                 }
-    //                 $i++;
-    //             }
-    //         }
-    //     } else {
-    //         $arrOps = ['AND', 'OR', 'NOT', '('];
-    //         $j = 0;
-    //         $arr = explode(" ", $conditions);
-    //         foreach ($arr as $v) {
-    //             if (strpos($v, $this->table.'.') === false) {
-    //                 if (strpos($v, '(') !== false) 
-    //                     $rs .= ($j ? " " : "").str_replace('(', '('.$table.'.', $v);
-    //                 else {
-    //                     if ($j) {
-    //                         $rs .= " ".(in_array(strtoupper($arr[$j-1]), $arrOps) ? $table.'.'.$v : $v);
-    //                     } else 
-    //                         $rs .= $table.'.'.$v;
-    //                 }
-    //             } else {
-    //                 $rs .= ($j ? " " : ""). $v;
-    //             }
-    //             $j++;
-    //         }
-    //     }
-    //     return $rs;
-    // }
     protected function conditionsJoin($conditions, $table = null) {
         if (!$table) $table = $this->table;
         $rs = '';
         if (is_array($conditions)) {
             $i = 0;
             foreach ($conditions as $k => $v) {
+                $logicalOp = ($i > 0) ? " AND " : "";  
                 if (is_array($v)) {
-                    if (isset($v['logicalOp'])) $rs .= $v['logicalOp']." ";
+                    if (isset($v['logicalOp'])) {
+                        $logicalOp = " " . strtoupper($v['logicalOp']) . " ";
+                    }
                     if (ArUtil::isMultiArray($v)) {
-                        $rs .= "(".$this->conditionsJoin($v).")";
+                        $tmp = $this->conditionsJoin($v, $table);
+                        if (strpos($tmp, ' AND ') !== false || strpos($tmp, ' OR ') !== false) {
+                            $rs .= $logicalOp . '(' . $tmp . ')';
+                        } else {
+                            $rs .= $logicalOp . $tmp;
+                        }
+                    } elseif (isset($v['field'], $v['comparisonOp'], $v['value'])) {
+                        $rs .= $logicalOp . $table . "." . $v['field'] . " " . $v['comparisonOp'] . " '" . $this->escape($v['value']) . "'";
                     } else {
-                        $rs .= $table.".".$v['field']." ".$v['comparisonOp']." '".$v['value']."'";
+                        continue;
                     }
                 } else {
-                    $field = (strpos($k, '.') === false) ? $table.'.'.$k : $k;
-                    $rs .= ($i ? " AND " : "") . $field . "='" . $v . "'";
-                    $i++;
+                    $field = (strpos($k, '.') === false) ? $table . '.' . $k : $k;
+                    $rs .= $logicalOp . $field . " = '" . $this->escape($v) . "'";
                 }
+                $i++;
             }
         } else {
-            $arrOps = ['AND', 'OR', 'NOT', '('];
-            $j = 0;
-            $arr = explode(" ", $conditions);
-            foreach ($arr as $v) {
-                if (strpos($v, $this->table.'.') === false) {
-                    if (strpos($v, '(') !== false) 
-                        $rs .= ($j ? " " : "").str_replace('(', '('.$table.'.', $v);
-                    else {
-                        if ($j) {
-                            $rs .= " ".(in_array(strtoupper($arr[$j-1]), $arrOps) ? $table.'.'.$v : $v);
-                        } else 
-                            $rs .= $table.'.'.$v;
-                    }
-                } else {
-                    $rs .= ($j ? " " : ""). $v;
-                }
-                $j++;
-            }
+            $rs = $conditions;
         }
+
         return $rs;
     }
-
+    protected function escape($value) {
+        return $this->con->real_escape_string($value);
+    }
     protected function addIDCondition($id, $options = null) {
         if (isset($options['conditions']) && is_array($options['conditions'])) {
             array_unshift($options['conditions'], ['id', ]);
