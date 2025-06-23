@@ -30,8 +30,8 @@ class CommentController extends MainController {
         if ($result) {
             $authorName = $_SESSION['user']['username'] ?? 'Unknown';
             $avatarUrl = !empty($_SESSION['user']['avatar_url']) 
-                ? RootREL . "media/uploads/users/" . $_SESSION['user']['avatar_url'] 
-                : RootREL . "media/uploads/users/avatar-default.png";
+                ? $_SESSION['user']['avatar_url'] 
+                : "avatar-default.png";
             echo json_encode([
                 'success' => true,
                 'message' => 'Comment added successfully.',
@@ -114,7 +114,31 @@ class CommentController extends MainController {
             ]
         ]);
     }
-    
+    public function loadComment() {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+            return;
+        }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        $postId = intval($data['postId']) ?? 0;
+        $offset = intval($data['offset']) ?? 0;
+        $limit = intval($data['limit']) ?? 0;
+
+        if (!$postId) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid post id']);
+            return;
+        }
+
+        $m = CommentModel::getInstance();
+        $comments = $m->getCommentsWithPagination($postId, $limit, $offset);
+
+        echo json_encode(['success' => true, 'data' => $comments]);
+    }
     public function loadRep() {
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -138,8 +162,5 @@ class CommentController extends MainController {
         $replies = $cm->getRepliesWithPagination($commentId, $limit, $offset);
 
         echo json_encode(['success' => true, 'data' => $replies]);
-    }
-    public function loadComment() {
-
     }
 }

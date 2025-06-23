@@ -30,7 +30,7 @@ class CommentModel extends CrudModel {
         }
         return $result;
     }
-    public function getCommentsByPostId($postId, $limit = 10) {
+    public function getCommentsByPostId($postId, $limit = 5) {
         $postId = (int)$postId;
         $limit = (int)$limit;
         $sql = "SELECT comments.*, users.username AS author_name, users.avatar_url as author_avatar
@@ -85,6 +85,37 @@ class CommentModel extends CrudModel {
         $stmt->bind_param('si', $path, $commentId);
         return $stmt->execute();
     }
+    public function getCommentsWithPagination($postId, $limit = 5, $offset = 0) {
+        $sql = "SELECT c.*, u.username AS author, u.avatar_url AS avatar
+                FROM {$this->table} c
+                JOIN users u ON c.user_id = u.id
+                WHERE c.post_id = ? AND c.parent_id IS NULL
+                ORDER BY c.created_at DESC
+                LIMIT ? OFFSET ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("iii", $postId, $limit, $offset);
+        // var_dump($sql); exit;
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $data = [];
+        while ($row = $result->fetch_assoc()) {
+            $row['has_reply'] = $this->hasReplies($row['id']);
+            $data[] = $row;
+        }
+        $stmt->close();
+        return $data;
+    }
+
+    public function hasReplies($parentId) {
+        $sql = "SELECT COUNT(*) as cnt FROM {$this->table} WHERE parent_id = ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("i", $parentId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result['cnt'] > 0;
+    }
+
     public function getRepliesWithPagination($parentId, $limit = 5, $offset = 0) {
         $sql = "SELECT c.*, u.username AS author, u.avatar_url AS avatar
                 FROM {$this->table} c

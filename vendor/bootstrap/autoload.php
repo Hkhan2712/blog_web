@@ -16,6 +16,7 @@ spl_autoload_register(function ($classname) {
         RootURI . 'vendor/validators/',
         RootURI . 'components/SimpleImage/',
         RootURI . 'middleware/',
+        RootURI . 'repositories/',
     ];
 
     foreach ($baseDirs as $baseDir) {

@@ -28,39 +28,26 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="<?php echo AppUtil::url(['ctl'=>'post'])?>">Blog</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Creator</a>
-                </li>
                 <li class="nav-item dropdown position-static">
                     <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                         Categories
                     </a>
+                    <?php 
+                    $categories = CategoryModel::getInstance()->getRecords('*'); 
+                    ?>
                     <div class="dropdown-menu w-100 p-4" style="max-width: 900px;">
                         <div class="row">
-                        <div class="col-md-4">
-                            <h6 class="fw-bold">Technology</h6>
-                            <ul class="list-unstyled">
-                            <li><a class="dropdown-item" href="#">AI</a></li>
-                            <li><a class="dropdown-item" href="#">Web Dev</a></li>
-                            <li><a class="dropdown-item" href="#">Gadgets</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="fw-bold">Entertainment</h6>
-                            <ul class="list-unstyled">
-                            <li><a class="dropdown-item" href="#">Movies</a></li>
-                            <li><a class="dropdown-item" href="#">Music</a></li>
-                            <li><a class="dropdown-item" href="#">Celebrities</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="fw-bold">Travel</h6>
-                            <ul class="list-unstyled">
-                            <li><a class="dropdown-item" href="#">Guides</a></li>
-                            <li><a class="dropdown-item" href="#">Experiences</a></li>
-                            <li><a class="dropdown-item" href="#">Hotels</a></li>
-                            </ul>
-                        </div>
+                            <?php foreach ($categories as $category): ?>
+                                <div class="col-md-4">
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <a class="dropdown-item" href="<?= AppUtil::url(['ctl' => 'category', 'act' => 'show', 'params' => [$category['id']]]) ?>">
+                                                <h6 class="fw-bold"><?= htmlspecialchars($category['name']) ?></h6>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </li>
@@ -70,15 +57,23 @@
             </ul>
         </div>
         <div class="d-flex gap-3 align-items-center">
-            <form class="d-flex form-inline my-2 my-lg-0 gap-1">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search on VBlog" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                    </svg>
-                </button>
-            </form>
-            
+            <?php
+            $showSearchingPost = isset($app['ctl']) && $app['ctl'] === 'post';
+            ?>
+            <?php if ($showSearchingPost): ?>
+                <form class="d-flex form-inline my-2 my-lg-0 gap-1"
+                        action="<?= AppUtil::url(['ctl' => 'post', 'act'=>'search'])?>"
+                        method="GET" role="search">
+                    <input type="hidden" name="ctl" value="post">
+                    <input type="hidden" name="act" value="search">
+                    <input class="form-control mr-sm-2" name="keyword" type="search" placeholder="Search on VBlog" aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                    </button>
+                </form>
+            <?php endif; ?>
             <?php if (isset($_SESSION['user'])): ?>
                 <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'add'])?>" class="link-bell">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">

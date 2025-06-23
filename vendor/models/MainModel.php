@@ -124,7 +124,7 @@ class MainModel {
 				$order .= $options['order'];
 			} else 	$order .= $this->table.".".$options['order'];
 		} else
-			$order .= $this->table.".created DESC";
+			$order .= $this->table.".created_at DESC";
 
 		$limit = "";
 		if(isset($options['pagination'])) {
@@ -134,6 +134,7 @@ class MainModel {
 		}
 
 		$sql = "SELECT ".$fields." FROM ".$this->table.$join.$conditions.$group.$order.$limit;
+        // var_dump($sql); exit;
 		return $this->con->query($sql);
 	}
     public function getIdLastRecord() {
@@ -405,6 +406,82 @@ class MainModel {
 		} else $record=false;
 		return $record['total'];
 	}
+
+    public function search(array $columns, string $keyword, int $limit = 10, int $offset = 0) {
+        $likeClauses = [];
+        $params = [];
+        foreach ($columns as $index => $column) {
+            $likeClauses[] = "$column LIKE ?";
+            $params[] = '%' . $keyword . '%';
+        }
+
+        $sql = "SELECT * FROM {$this->table} 
+                WHERE " . implode(" OR ", $likeClauses) . " 
+                ORDER BY created_at DESC 
+                LIMIT ? OFFSET ?";
+
+        $params[] = $limit;
+        $params[] = $offset;
+
+        return $this->fetchAll($sql, $params);
+    }
+
+
+    public function countSearch(array $columns, string $keyword): int {
+        $likeClauses = [];
+        $params = [];
+        foreach ($columns as $column) {
+            $likeClauses[] = "$column LIKE ?";
+            $params[] = '%' . $keyword . '%';
+        }
+
+        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE " . implode(" OR ", $likeClauses);
+
+        $stmt = $this->con->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->con->error);
+        }
+
+        if (!empty($params)) {
+            $types = str_repeat('s', count($params));
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        $row = $result->fetch_assoc();
+        return (int)$row['total'];
+    }
+
+    protected function fetchAll(string $sql, array $params = []) {
+        $stmt = $this->con->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->con->error);
+        }
+
+        if (!empty($params)) {
+            // Dynamically bind params
+            $types = str_repeat('s', count($params));  // Assuming all are strings; adjust as needed
+            $stmt->bind_param($types, ...array_values($params));
+        }
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
 
 	public function getRecordsArray($fields='*', $options=null) {
 		$records = [];

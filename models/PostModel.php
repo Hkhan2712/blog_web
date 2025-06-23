@@ -31,13 +31,12 @@ class PostModel extends FrapModel {
     }
 
     public function getOutstandingPost() {
-        $sql = "SELECT posts.*, users.username AS author_name
+        $sql = "SELECT posts.*, users.username AS author
                 FROM posts
                 JOIN users ON posts.user_id = users.id
-                WHERE posts.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                WHERE posts.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
                 ORDER BY posts.like_quantity DESC
                 LIMIT 1";
-        
         $result = $this->con->query($sql);
         return $result->fetch_assoc();
     }

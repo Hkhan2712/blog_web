@@ -1,20 +1,84 @@
 .post-card {
     transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 .post-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
-.post-card:hover .img-zoom {
-    transform: scale(1.05);
+
+/* Zoom ảnh khi hover */
+.post-card .card-img-top {
+    transition: transform 0.4s ease;
 }
+.post-card:hover .card-img-top {
+    transform: scale(1.08);
+}
+
+/* Overlay mờ nhẹ khi hover */
+.post-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    transition: background 0.3s ease;
+    z-index: 1;
+}
+.post-card:hover::before {
+    background: rgba(0,0,0,0.15);
+}
+
+/* Tiêu đề post */
 .post-title-link {
-    color: #000;
+    color: #222;
     text-decoration: none;
     transition: color 0.3s, text-decoration 0.3s;
+    position: relative;
+    z-index: 2;
 }
 .post-card:hover .post-title-link,
 .post-title-link:hover {
     color: #228B22;
     text-decoration: underline;
+}
+
+/* Nút Read More */
+.btn-readmore {
+    transition: background-color 0.3s, color 0.3s;
+}
+.btn-readmore:hover {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+/* Badge Tag */
+.badge {
+    font-size: 0.75rem;
+    background-color: #6c757d;
+}
+
+/* Animation fade lên khi cuộn */
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.post-card {
+    animation: fadeUp 0.6s ease both;
+}
+#like-btn {
+    color: #228B22;
+    border-color: #228B22;
+}
+#like-btn:hover span {
+    color: #228B22;
+}
+.btn:disabled {
+    background-color: #fff;
 }

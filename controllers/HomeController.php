@@ -7,8 +7,7 @@ class HomeController extends MainController {
         $m = PostModel::getInstance();
         $this->outstanding = $m->getOutstandingPost();
         $this->newestPosts = $m->getNewestPost(10);
-        $this->listPosts = $m->getListPosts(20);
-
+        $this->listPosts = $m->getListPosts(5);
         $this->display();
     }
 }

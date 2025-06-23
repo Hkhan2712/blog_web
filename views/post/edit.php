@@ -61,8 +61,7 @@
                 class="form-control" 
                 id="content" 
                 name="content" 
-                rows="10" 
-                required
+                rows="10"
             ><?= htmlspecialchars($this->record['content']) ?></textarea>
         </div>
 
@@ -74,5 +73,40 @@
         </div>
     </form>
 </section>
+
+<!-- TinyMCE -->
+<script src="https://cdn.tiny.cloud/1/bywwhzmxbuun804w7e7tkx0er4yfhcyylwb466fksk4l8m3r/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+tinymce.init({
+	selector: '#content',
+	height: 500,
+	plugins: 'image media link lists code table',
+	toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
+	automatic_uploads: true,
+	images_upload_url: '<?= AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']) ?>',
+	file_picker_types: 'image',
+	images_upload_handler: function (blobInfo, success, failure) {
+		let formData = new FormData();
+		formData.append('file', blobInfo.blob(), blobInfo.filename());
+		fetch('<?= AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']) ?>', {
+			method: 'POST',
+			body: formData
+		})
+		.then(response => response.json())
+		.then(result => {
+			success(result.location);
+		})
+		.catch(() => failure('Upload failed.'));
+	}
+});
+
+document.querySelector('form').addEventListener('submit', function(e) {
+	const content = tinymce.get('content').getContent({ format: 'text' }).trim();
+	if (content === '') {
+		alert('Please enter content!');
+		e.preventDefault();
+	}
+});
+</script>
 
 <?php include_once "views/layouts/user/footer.php"; ?>

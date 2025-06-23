@@ -19,7 +19,7 @@ h5 {
 
 .image-container img {
     width: 100%;
-    height: auto;
+    height: 500px;
     display: block;
     opacity: 0.9;
 }

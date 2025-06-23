@@ -4,16 +4,14 @@ class PostController extends MainController
     protected $errors = false;
     protected $listPosts;
     protected $record;
-    protected $isLiked = false;
-    protected $isLikedCm = false; 
-    protected $comments = [];
+    protected $keyword; 
     protected $totalPages = 1;
     protected $currentPage = 1;
     protected $recommendedPosts = [];
     public function index()
     {
         $m = PostModel::getInstance();
-        $limit = 10;
+        $limit = 12;
         $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
         $offset = ($page -1) * $limit;
 
@@ -29,25 +27,10 @@ class PostController extends MainController
         $id = (int)$id[1];
         $pm = PostModel::getInstance();
         $cm = CommentModel::getInstance();
-
         $this->record = $pm->getPostById($id);
         $this->recommendedPosts = $pm->getRecommendedPosts($id);
-        $this->comments = $cm->getCommentsByPostId($id);
-
-        if ($this->comments instanceof Traversable) {
-            $this->comments = iterator_to_array($this->comments);
-        }
 
         $userId = $_SESSION['user']['id'] ?? 0;
-
-        if ($userId) {
-            $this->isLiked = $pm->hasUserLiked($id, $userId);
-            foreach ($this->comments as $k => $comment) {
-                $comment['is_liked'] = $cm->hasUserLikedCm($comment['id'], $userId);
-                $this->comments[$k] = $comment;
-            }
-        }
-
         $this->display();
     }
 
@@ -128,5 +111,45 @@ class PostController extends MainController
         $m->delRecord($id);
         header('Location:' . AppUtil::url(['ctl' => 'post']));
         exit();
+    }
+    public function search() {
+        $keyword = trim($_GET['keyword'] ?? '');
+        $m = PostModel::getInstance();
+
+        if (empty($keyword)) {
+            header('Location:' . AppUtil::url(['ctl' => 'post']));
+            exit();
+        }
+
+        $limit = 10;
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $offset = ($page - 1) * $limit;
+
+        $this->listPosts = $m->search(['title','content'], $keyword, $limit, $offset);
+        $totalResults = $m->countSearch(['title', 'content'],$keyword);
+        $this->totalPages = ceil($totalResults / $limit);
+        $this->currentPage = $page;
+        $this->keyword = $keyword;
+
+        $this->display();
+    }
+    public function uploadTinyMce() {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['file'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid request']);
+            return;
+        }
+
+        $options = ['folder' => 'posts']; // bạn muốn lưu ảnh vào thư mục nào
+        $imagePath = $this->uploadImg($_FILES, $options, 'file');
+
+        if ($imagePath !== false) {
+            echo json_encode(['location' => RootURL . UploadREL . $options['folder'] . $imagePath]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Upload failed']);
+        }
     }
 }
