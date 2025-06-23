@@ -50,9 +50,9 @@
                             </td>
                             <td><?= htmlspecialchars(date("M d, Y", strtotime($post['created_at']))) ?></td>
                             <td class="text-end">
-                                <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'edit', 'id' => $post['id']]) ?>" 
+                                <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'edit', 'params' => [$post['id']]]) ?>" 
                                    class="btn btn-sm btn-outline-warning me-1">Edit</a>
-                                <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'del', 'id' => $post['id']]) ?>" 
+                                <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'del', 'params' => [$post['id']]]) ?>" 
                                    class="btn btn-sm btn-outline-danger" 
                                    onclick="return confirm('Are you sure you want to delete this post?');">Delete</a>
                             </td>

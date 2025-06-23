@@ -108,14 +108,14 @@ class CommentController extends MainController {
                 'created_at' => date('F d, Y'),
                 'author' => htmlspecialchars($_SESSION['user']['username'] ?? 'You'),
                 'avatar' => !empty($_SESSION['user']['avatar_url'])
-                    ? RootREL . "media/uploads/users/" . $_SESSION['user']['avatar_url']
-                    : RootREL . "media/uploads/users/avatar-default.png",
+                    ? $_SESSION['user']['avatar_url']
+                    : "avatar-default.png",
                 'content' => htmlspecialchars($content),
             ]
         ]);
     }
     
-    public function load() {
+    public function loadRep() {
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
@@ -138,5 +138,8 @@ class CommentController extends MainController {
         $replies = $cm->getRepliesWithPagination($commentId, $limit, $offset);
 
         echo json_encode(['success' => true, 'data' => $replies]);
+    }
+    public function loadComment() {
+
     }
 }

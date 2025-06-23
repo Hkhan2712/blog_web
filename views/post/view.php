@@ -42,7 +42,7 @@ $isLoggedIn = isset($_SESSION['user']);
     const currentUserId = <?= $isLoggedIn ? (int)$_SESSION['user']['id'] : 0 ?>;
     const commentUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'add']) ?>';
     const replyUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'reply']) ?>';
-    const loadReplyUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'load'])?>'
+    const loadReplyUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'loadRep'])?>'
 </script>
 
 <?php include_once "views/layouts/user/footer.php" ?>

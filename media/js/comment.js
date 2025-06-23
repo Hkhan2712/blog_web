@@ -31,7 +31,7 @@ const CommentModule = (() => {
             <div class="comment-item mb-3" id="comment-${comment.id}">
                 <div class="d-flex gap-3 align-items-start">
                     <div class="avatar">
-                        <img src="${comment.avatar}" class="rounded-circle" width="30" height="30">
+                        <img src="/media/uploads/users/${comment.avatar}" class="rounded-circle" width="30" height="30">
                     </div>
                     <div class="comment-content flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -67,6 +67,12 @@ const CommentModule = (() => {
     }
 
     function createReplyHTML(reply) {
+        const createdAt = new Date(reply.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit'
+        });
+
         return `
             <div class="reply-item mb-2" id="reply-${reply.id}">
                 <div class="d-flex gap-2 align-items-start">
@@ -76,7 +82,7 @@ const CommentModule = (() => {
                     <div class="reply-content">
                         <div class="d-flex justify-content-between align-items-center mb-1 gap-2">
                             <strong>${reply.author}</strong>
-                            <span class="text-muted small">${reply.created_at}</span>
+                            <span class="text-muted small">${createdAt}</span>
                         </div>
                         <p class="mb-0 small">${reply.content}</p>
                         ${currentUserId ? `
@@ -207,6 +213,9 @@ const CommentModule = (() => {
         }
     }
 
+    async function loadComment() {
+
+    }
     async function loadReplies(commentId, offset = 0, limit = 5) {
         const repliesContainer = document.querySelector(selectors.repliesContainer(commentId));
         const btn = document.querySelector(`#show-replies-${commentId}`);
@@ -249,6 +258,7 @@ const CommentModule = (() => {
         replyComment,
         likePost,
         likeComment,
+        loadComment,
         loadReplies
     };
 })();

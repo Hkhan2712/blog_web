@@ -77,7 +77,8 @@ class PostController extends MainController
         }
         $this->display(); 
     }
-    public function edit($id) {
+    public function edit($id)
+    {
         $id = (int)$id[1];
         $m = PostModel::getInstance();
         $this->record = $m->getPostById($id);
@@ -87,29 +88,33 @@ class PostController extends MainController
             exit('Post not found');
         }
 
-        if (isset($_POST['btn_submit'])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = trim($_POST['title'] ?? '');
+            $tags = trim($_POST['tags'] ?? '');
             $content = trim($_POST['content'] ?? '');
             $image = $this->record['image_url'];
 
+            // Xử lý upload ảnh mới nếu có
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
             }
 
+            // Validate
             if ($title && $content) {
-                $m->updateRecord($id, [
-                    'title' => $title,
-                    'content' => $content,
+                $m->updateWhere([
+                    'title'     => $title,
+                    'content'   => $content,
                     'image_url' => $image,
-                ]);
-                header('Location:' . AppUtil::url(['ctl' => 'post', 'act' => 'view', 'id' => $id]));
+                ], "id = $id");
+                header('Location: ' . AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$id]]));
                 exit();
             } else {
                 $this->errors = "Please fill in all required fields.";
             }
         }
+
         $this->display();
-    } 
+    }
     public function del($id) {
         $id = (int)$id[1];
         $m = PostModel::getInstance();
