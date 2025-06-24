@@ -8,10 +8,7 @@
     <h1 class="py-5 d-flex justify-content-center">Articles</h1>
     <div class="row g-4">
         <?php foreach ($this->listPosts as $post): 
-            $tags = [];
-            if (isset($post['tags']) && $post['tags']) {
-                $tags = array_map('trim', explode(',', $post['tags']));
-            };
+            $tags = PostTagModel::getTagsByPostId($post['id']);           
         ?>
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card post-card h-100 shadow-sm rounded overflow-hidden">
@@ -36,7 +33,7 @@
 
                     <div class="mb-2">
                     <?php foreach ($tags as $tag): ?>
-                        <span class="badge bg-secondary me-1"><?= htmlspecialchars($tag) ?></span>
+                        <span class="badge bg-secondary me-1"><?= htmlspecialchars($tag['name']) ?></span>
                     <?php endforeach; ?>
                     </div>
                     <h5 class="card-title"><?= htmlspecialchars($post['title']) ?></h5>

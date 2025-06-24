@@ -1,5 +1,6 @@
 <?php
 class PostCategoryModel extends CrudModel {
+    protected $table = 'post_categories';
     public static function getCategoriesByPostId($postId) {
         $sql = "SELECT categories.* 
                 FROM post_categories 

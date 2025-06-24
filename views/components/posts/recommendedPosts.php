@@ -3,6 +3,7 @@
     <h2 class="h4 mb-4">Recommended Posts</h2>
     <div class="row g-3">
         <?php foreach ($recommendedPosts as $post): ?>
+            <?php $tags = PostTagModel::getTagsByPostId($post['id']); ?>
             <article class="col-md-4">
                 <div class="card post-card h-100 shadow-sm rounded overflow-hidden">
                     <img src="<?= RootREL . "media/uploads/posts/" . $post['image_url'] ?>" class="card-img-top" alt="<?= htmlspecialchars($post['title']) ?>" style="height: 200px; object-fit: cover;">
@@ -23,7 +24,7 @@
                         </div>
                         <div class="mb-2">
                             <?php foreach ($tags as $tag): ?>
-                                <span class="badge bg-secondary me-1"><?= htmlspecialchars($tag) ?></span>
+                                <span class="badge bg-secondary me-1"><?= htmlspecialchars($tag['name']) ?></span>
                             <?php endforeach; ?>
                         </div>
                         <h5 class="card-title"><?= htmlspecialchars($post['title']) ?></h5>

@@ -11,4 +11,17 @@ class CategoryModel extends FrapModel {
         	'description'=>[['required', 'errmsg'=>'Description can not bank!'], 'string'],
 	    ];
     }
+	public function getCategoriesActive($limit = 0) {
+		$sql = "SELECT * FROM `categories` WHERE `status` = 'active' ORDER BY `created_at` DESC";
+		if ($limit > 0) {
+			$sql .= " LIMIT " . (int)$limit;
+		}
+
+		$result = $this->con->query($sql);
+		$data = [];
+		while ($row = $result->fetch_assoc()) {
+			$data[] = $row;
+		}
+		return $data;
+	}
 }

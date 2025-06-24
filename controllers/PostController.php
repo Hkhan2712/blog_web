@@ -44,27 +44,67 @@ class PostController extends MainController
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
             } 
+
             if ($title && $content) {
-                $m = PostModel::getInstance();
-                $m->addRecord([
+                $postModel = PostModel::getInstance();
+
+                $postId = $postModel->addRecord([
                     'title' => $title,
                     'content' => $content,
-                    'image_url' => $image,
-                    'user_id' => (int)$_SESSION['user']['id'] ?? 0,
+                    'image_url' => $image ?: 'default.png',
+                    'user_id' => (int)($_SESSION['user']['id'] ?? 0),
                 ]);
-                header('Location:'.AppUtil::url(['ctl' => 'post']));
+
+                if (isset($_POST['categories']) && is_array($_POST['categories'])) {
+                    $postCategoryModel = PostCategoryModel::getInstance();
+                    foreach ($_POST['categories'] as $categoryId) {
+                        $postCategoryModel->addPostToCategory($postId,(int)$categoryId);
+                    }
+                }
+
+                if (!empty($_POST['tags'])) {
+                    $tagInput = trim($_POST['tags']);
+                    $tagsArray = [];
+                    $json = json_decode($tagInput, true);
+                    if (is_array($json)) {
+                        foreach ($json as $tagItem) {
+                            if (!empty($tagItem['value'])) {
+                                $tagsArray[] = trim($tagItem['value']);
+                            }
+                        }
+                    }
+
+                    if (!empty($tagsArray)) {
+                        $tagModel = TagModel::getInstance();
+                        $postTagModel = PostTagModel::getInstance();
+
+                        foreach ($tagsArray as $tagName) {
+                            // Kiểm tra xem tag đã tồn tại chưa
+                            $tag = $tagModel->getRecordByField('name', $tagName);
+                            if (!$tag) {
+                                $tagId = $tagModel->addRecord(['name' => $tagName]);
+                            } else {
+                                $tagId = $tag['id'];
+                            }
+                            $postTagModel->addTagToPost($postId,$tagId);
+                        }
+                    }
+                }
+
+                header('Location: ' . AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$postId]]));
                 exit();
             } else {
                 $this->errors = "Please fill in all required fields.";
             }
         }
-        $this->display(); 
+        $this->display();
     }
+
     public function edit($id)
     {
-        $id = (int)$id[1];
-        $m = PostModel::getInstance();
-        $this->record = $m->getPostById($id);
+        $id = (int)($id[1] ?? 0);
+        $postModel = PostModel::getInstance();
+        $this->record = $postModel->getPostById($id);
 
         if (!$this->record) {
             header('HTTP/1.0 404 Not Found');
@@ -73,8 +113,8 @@ class PostController extends MainController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = trim($_POST['title'] ?? '');
-            $tags = trim($_POST['tags'] ?? '');
             $content = trim($_POST['content'] ?? '');
+            $status = $_POST['status'] ?? 'draft';
             $image = $this->record['image_url'];
 
             // Xử lý upload ảnh mới nếu có
@@ -82,13 +122,55 @@ class PostController extends MainController
                 $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
             }
 
-            // Validate
             if ($title && $content) {
-                $m->updateWhere([
+                // Cập nhật bài viết
+                $postModel->updateWhere([
                     'title'     => $title,
                     'content'   => $content,
                     'image_url' => $image,
+                    'status'    => $status,
+                    'updated_at'=> date('Y-m-d H:i:s')
                 ], "id = $id");
+
+                // ===== Categories =====
+                $postCategoryModel = PostCategoryModel::getInstance();
+                $postCategoryModel->deleteRecordsWhere("post_id = $id");
+                if (isset($_POST['categories']) && is_array($_POST['categories'])) {
+                    foreach ($_POST['categories'] as $categoryId) {
+                        $postCategoryModel->addPostToCategory($id, (int)$categoryId);
+                    }
+                }
+
+                // ===== Tags =====
+                $postTagModel = PostTagModel::getInstance();
+                $postTagModel->deleteRecordsWhere("post_id = $id");
+
+                if (!empty($_POST['tags'])) {
+                    $tagInput = trim($_POST['tags']);
+                    $tagsArray = [];
+                    $json = json_decode($tagInput, true);
+                    if (is_array($json)) {
+                        foreach ($json as $tagItem) {
+                            if (!empty($tagItem['value'])) {
+                                $tagsArray[] = trim($tagItem['value']);
+                            }
+                        }
+                    }
+
+                    if (!empty($tagsArray)) {
+                        $tagModel = TagModel::getInstance();
+                        foreach ($tagsArray as $tagName) {
+                            $tag = $tagModel->getRecordByField('name', $tagName);
+                            if (!$tag) {
+                                $tagId = $tagModel->addRecord(['name' => $tagName]);
+                            } else {
+                                $tagId = $tag['id'];
+                            }
+                            $postTagModel->addTagToPost($id, $tagId);
+                        }
+                    }
+                }
+
                 header('Location: ' . AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$id]]));
                 exit();
             } else {
@@ -98,6 +180,7 @@ class PostController extends MainController
 
         $this->display();
     }
+
     public function del($id) {
         $id = (int)$id[1];
         $m = PostModel::getInstance();

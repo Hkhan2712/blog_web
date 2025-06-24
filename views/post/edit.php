@@ -1,7 +1,7 @@
 <?php include_once "views/layouts/user/header.php"; ?>
 
-<section class="container py-5">
-    <h1 class="mb-4">Edit Post</h1>
+<div class="container py-5">
+    <h2 class="mb-4">Edit Post</h2>
 
     <form action="<?= AppUtil::url(['ctl' => 'post', 'act' => 'edit', 'params' => [$this->record['id']]]) ?>" method="POST" enctype="multipart/form-data">
         <!-- Title -->
@@ -17,18 +17,32 @@
             >
         </div>
 
-        <!-- Tags -->
+        <!-- Status -->
         <div class="mb-3">
-            <label for="tags" class="form-label">Tags (separated by commas)</label>
-            <input 
-                type="text" 
-                class="form-control" 
-                id="tags" 
-                name="tags" 
-                value="<?= htmlspecialchars($this->record['tags'] ?? '') ?>"
-            >
+            <label class="form-label">Status</label><br>
+            <div class="btn-group" role="group">
+                <?php 
+                $statuses = ['draft' => 'Draft', 'published' => 'Published', 'pending' => 'Pending', 'archived' => 'Archived'];
+                foreach ($statuses as $value => $label): ?>
+                    <input type="radio" class="btn-check" name="status" id="status-<?= $value ?>" value="<?= $value ?>" <?= ($this->record['status'] === $value) ? 'checked' : '' ?>>
+                    <label class="btn btn-outline-success" for="status-<?= $value ?>"><?= $label ?></label>
+                <?php endforeach; ?>
+            </div>
         </div>
 
+
+        <!-- Categories -->
+        <?php 
+        $selectedCategories = array_column(PostCategoryModel::getInstance()->getCategoriesByPostId($this->record['id']), 'id');
+        include "views/components/posts/categoryForm.php";
+        ?>
+
+        <!-- Tags -->
+        <?php 
+        $selectedTags = PostTagModel::getInstance()->getTagsByPostId($this->record['id']);
+        include "views/components/posts/tagForm.php"; 
+        ?>
+        
         <!-- Current Image -->
         <?php if (!empty($this->record['image_url'])): ?>
             <div class="mb-3">
@@ -65,14 +79,12 @@
             ><?= htmlspecialchars($this->record['content']) ?></textarea>
         </div>
 
-        <div class="d-flex justify-content-between">
-            <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$this->record['id']]]) ?>" class="btn btn-secondary">
-                Cancel
-            </a>
+        <div class="d-flex gap-3">
+            <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$this->record['id']]]) ?>" class="btn btn-secondary">Cancel</a>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
     </form>
-</section>
+</div>
 
 <!-- TinyMCE -->
 <script src="https://cdn.tiny.cloud/1/bywwhzmxbuun804w7e7tkx0er4yfhcyylwb466fksk4l8m3r/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>

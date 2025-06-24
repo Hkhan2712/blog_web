@@ -9,13 +9,10 @@
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" name="title" required>
         </div>
-
+        <!-- Category -->
+        <?php include_once "views/components/posts/categoryForm.php" ?>
         <!-- Tags -->
-        <div class="mb-3">
-            <label for="tags" class="form-label">Tags (separated by commas)</label>
-            <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g. PHP, Programming, Web Development">
-        </div>
-
+        <?php include_once "views/components/posts/tagForm.php" ?>
         <!-- Cover Image -->
         <div class="mb-3">
             <label for="image" class="form-label">Cover Image</label>

@@ -337,7 +337,7 @@ class CrudModel extends MainModel {
     }
 
     public function deleteRecordsWhere($conditions = "") {
-        $query = "DELETE FROM ".$this->table.($conditions != "" ? "WHERE ".$conditions : '');
+        $query = "DELETE FROM ".$this->table.($conditions != "" ? " WHERE ".$conditions : '');
         if (mysqli_query($this->con, $query)) 
             return true;
         else {

@@ -1,7 +1,8 @@
 <?php 
 class PostTagModel extends CrudModel {
+    protected $table = 'post_tags';
     public static function getTagsByPostId($postId) {
-        $sql = "SELECT tags.* 
+        $sql = "SELECT tags.id, tags.name 
                 FROM post_tags 
                 JOIN tags ON post_tags.tag_id = tags.id 
                 WHERE post_tags.post_id = ?";

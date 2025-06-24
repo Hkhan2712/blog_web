@@ -38,7 +38,7 @@
                 
                 <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]])?>" class="h4"><?=$post['title']?></a>
                 <div class="d-flex gap-2">
-                    <?php foreach ($tags as $tag): ?>
+                    <?php foreach (array_slice($tags, 0 ,2) as $tag): ?>
                         <span class="tag"><?= htmlspecialchars($tag) ?></span>
                     <?php endforeach; ?>
                 </div>
