@@ -3,11 +3,10 @@
     <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-column gap-2">
             <!-- list of posts -->
-            <?php foreach ($this->listPosts as $post):
-                $tags = [];
-                if (isset($post['tags']) && $post['tags']) {
-                    $tags = array_map('trim', explode(',', $post['tags']));
-                }
+            <?php 
+                $posts = PostRepository::getNewestPosts(5);
+                foreach ($posts as $post):
+                $tags = PostTagModel::getInstance()->getTagsByPostId($post['id']);
             ?>
                 <div class="post-item d-flex" style="max-height: 284.79px;">
                     <div class="post-thumb">
@@ -16,7 +15,7 @@
                     <div class="post-content">
                         <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
                             <span>
-                                <?= $post['author_name'] ?> 
+                                <?= $post['user']['username'] ?> 
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dot" viewBox="0 0 16 16">
                                     <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
                                 </svg>
@@ -39,7 +38,7 @@
                         </div>
                         <div class="tags">
                             <?php foreach ($tags as $tag): ?>
-                                <span class="tag"><?= htmlspecialchars($tag) ?></span>
+                                <span class="tag"><?= htmlspecialchars($tag['name']) ?></span>
                             <?php endforeach; ?>
                         </div>
                         <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]]) ?>" class="h3"><?= htmlspecialchars($post['title']) ?></a>

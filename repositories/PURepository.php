@@ -18,6 +18,22 @@ class PURepository {
         return $data;
     }
     public static function getUserByPostId($postId) {
+        $post = PostModel::getInstance()->getRecord($postId);
+        if (!$post) return false;
 
+        $user = UserModel::getInstance()->getRecord($post['user_id']);
+        if ($user) return $user;
+        else return false;
+    }
+    public static function hasUserLiked($postId, $userId, $entityType = 'post') {
+        $postId = (int)$postId;
+        $userId = (int)$userId;
+        $sql = "SELECT id FROM likes WHERE entity_id = ? AND user_id = ? AND entity_type = ? LIMIT 1";
+        $stmt = ConnectDB::getInstance()->getConnection()->prepare($sql);
+        $stmt->bind_param("ii", $postId, $userId);
+        $stmt->bind_param("s", $entityType);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
     }
 }

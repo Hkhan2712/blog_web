@@ -32,9 +32,9 @@
                     </div>
 
                     <div class="mb-2">
-                    <?php foreach ($tags as $tag): ?>
-                        <span class="badge bg-secondary me-1"><?= htmlspecialchars($tag['name']) ?></span>
-                    <?php endforeach; ?>
+                        <?php foreach (array_slice($tags, 0, 3) as $tag): ?>
+                            <span class="badge bg-secondary me-1"><?= htmlspecialchars($tag['name']) ?></span>
+                        <?php endforeach; ?>
                     </div>
                     <h5 class="card-title"><?= htmlspecialchars($post['title']) ?></h5>
                     <p class="card-text mb-auto"><?= htmlspecialchars(mb_strimwidth(strip_tags($post['content']), 0, 100, '...')) ?></p>

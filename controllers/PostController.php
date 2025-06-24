@@ -26,10 +26,13 @@ class PostController extends MainController
     {
         $id = (int)$id[1];
         $pm = PostModel::getInstance();
-        $cm = CommentModel::getInstance();
-        $this->record = $pm->getPostById($id);
-        $this->recommendedPosts = $pm->getRecommendedPosts($id);
-
+        $this->record['user'] = PURepository::getUserByPostId($id);
+        if (!$this->record['user']) {
+            header('HTTP/1.0 404 Not Found');
+            exit('User not found');
+        }   
+        $this->record['post'] = PostModel::getInstance()->getRecord((int)$id);
+        $this->recommendedPosts = PostRepository::getRecommendedPosts($id);
         $userId = $_SESSION['user']['id'] ?? 0;
         $this->display();
     }
@@ -103,8 +106,8 @@ class PostController extends MainController
     public function edit($id)
     {
         $id = (int)($id[1] ?? 0);
-        $postModel = PostModel::getInstance();
-        $this->record = $postModel->getPostById($id);
+        $this->record = PostModel::getInstance()->getRecord($id);
+
 
         if (!$this->record) {
             header('HTTP/1.0 404 Not Found');
@@ -124,7 +127,7 @@ class PostController extends MainController
 
             if ($title && $content) {
                 // Cập nhật bài viết
-                $postModel->updateWhere([
+                PostModel::getInstance()->updateWhere([
                     'title'     => $title,
                     'content'   => $content,
                     'image_url' => $image,
@@ -184,7 +187,7 @@ class PostController extends MainController
     public function del($id) {
         $id = (int)$id[1];
         $m = PostModel::getInstance();
-        $record = $m->getPostById($id);
+        $record = $m->getRecord($id);
 
         if (!$record) {
             header('HTTP/1.0 404 Not Found');
@@ -192,6 +195,10 @@ class PostController extends MainController
         }
 
         $m->delRecord($id);
+        $postCategoryModel = PostCategoryModel::getInstance();
+        $postCategoryModel->deleteRecordsWhere("post_id = $id");
+        $postTagModel = PostTagModel::getInstance();
+        $postTagModel->deleteRecordsWhere("post_id = $id");
         header('Location:' . AppUtil::url(['ctl' => 'post']));
         exit();
     }
@@ -225,7 +232,7 @@ class PostController extends MainController
             return;
         }
 
-        $options = ['folder' => 'posts']; // bạn muốn lưu ảnh vào thư mục nào
+        $options = ['folder' => 'posts']; 
         $imagePath = $this->uploadImg($_FILES, $options, 'file');
 
         if ($imagePath !== false) {

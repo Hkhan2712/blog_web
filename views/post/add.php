@@ -9,10 +9,13 @@
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" name="title" required>
         </div>
+
         <!-- Category -->
-        <?php include_once "views/components/posts/categoryForm.php" ?>
+        <?php include_once "views/components/posts/categoryForm.php"; ?>
+
         <!-- Tags -->
-        <?php include_once "views/components/posts/tagForm.php" ?>
+        <?php include_once "views/components/posts/tagForm.php"; ?>
+
         <!-- Cover Image -->
         <div class="mb-3">
             <label for="image" class="form-label">Cover Image</label>
@@ -34,35 +37,57 @@
 
 <!-- TinyMCE -->
 <script src="https://cdn.tiny.cloud/1/bywwhzmxbuun804w7e7tkx0er4yfhcyylwb466fksk4l8m3r/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+<?php $uploadUrl = AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']); ?>
+
 <script>
-tinymce.init({
-	selector: '#content',
-	height: 500,
-	plugins: 'image media link lists code table',
-	toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
-	automatic_uploads: true,
-	images_upload_url: '<?= AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']) ?>',
-	file_picker_types: 'image',
-	images_upload_handler: function (blobInfo, success, failure) {
-		let formData = new FormData();
-		formData.append('file', blobInfo.blob(), blobInfo.filename());
-		fetch('<?= AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']) ?>', {
-			method: 'POST',
-			body: formData
-		})
-		.then(response => response.json())
-		.then(result => {
-			success(result.location);
-		})
-		.catch(() => failure('Upload failed.'));
-	}
-});
-document.querySelector('form').addEventListener('submit', function(e) {
-	const content = tinymce.get('content').getContent({ format: 'text' }).trim();
-	if (content === '') {
-		alert('Please enter content!');
-		e.preventDefault();
-	}
+document.addEventListener("DOMContentLoaded", function() {
+	const uploadUrl = '<?= $uploadUrl ?>';
+
+	tinymce.init({
+		selector: '#content',
+		height: 500,
+		plugins: 'image media link lists code table',
+		toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
+		automatic_uploads: true,
+		images_upload_url: uploadUrl,
+		file_picker_types: 'image',
+		images_upload_handler: function (blobInfo, success, failure) {
+			const formData = new FormData();
+			formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+			fetch(uploadUrl, {
+				method: 'POST',
+				body: formData
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error("HTTP error " + response.status);
+				}
+				return response.json();
+			})
+			.then(result => {
+				if (result && result.location) {
+					success(result.location);
+				} else {
+					console.error("Invalid response:", result);
+					failure("Invalid response from server");
+				}
+			})
+			.catch(err => {
+				console.error(err);
+				failure("Upload failed: " + err.message);
+			});
+		}
+	});
+
+	document.querySelector('form').addEventListener('submit', function(e) {
+		const content = tinymce.get('content').getContent({ format: 'text' }).trim();
+		if (content === '') {
+			alert('Please enter content!');
+			e.preventDefault();
+		}
+	});
 });
 </script>
 

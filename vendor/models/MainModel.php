@@ -192,6 +192,71 @@ class MainModel {
 		} else $options['conditions'] = $wheres;
 		return $this->getDetailRecord($fields, $options);
 	}
+    public function getRecordsAdvanced($fields = '*', $wheres = [], $options = []) {
+        $sql = "SELECT {$fields} FROM {$this->table}";
+        
+        $conditions = [];
+        $params = [];
+        $types = '';
+
+        foreach ($wheres as $key => $value) {
+            // Nếu là dạng ['operator' => ..., 'value' => ...]
+            if (is_array($value) && isset($value['operator'], $value['value'])) {
+                $operator = strtoupper($value['operator']);
+                if ($operator === 'IN' && is_array($value['value'])) {
+                    $placeholders = implode(',', array_fill(0, count($value['value']), '?'));
+                    $conditions[] = "{$key} IN ({$placeholders})";
+                    foreach ($value['value'] as $val) {
+                        $params[] = $val;
+                        $types .= $this->getTypeChar($val);
+                    }
+                } else {
+                    $conditions[] = "{$key} {$operator} ?";
+                    $params[] = $value['value'];
+                    $types .= $this->getTypeChar($value['value']);
+                }
+            } else {
+                // Mặc định là '='
+                $conditions[] = "{$key} = ?";
+                $params[] = $value;
+                $types .= $this->getTypeChar($value);
+            }
+        }
+
+        if (!empty($conditions)) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        if (isset($options['order'])) {
+            $sql .= ' ORDER BY ' . $options['order'];
+        }
+
+        if (isset($options['limit'])) {
+            $sql .= ' LIMIT ' . (int)$options['limit'];
+            if (isset($options['offset'])) {
+                $sql .= ' OFFSET ' . (int)$options['offset'];
+            }
+        }
+
+        $stmt = $this->con->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->con->error);
+        }
+
+        if ($params) {
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    private function getTypeChar($value) {
+        if (is_int($value)) return 'i';
+        if (is_float($value)) return 'd';
+        return 's';
+    }
 
     public function getCountWhere($wheres) {
         $sql = "COUNT(*) AS total FROM {$this->table} WHERE ";

@@ -4,7 +4,7 @@ global $mediaFiles;
 array_push($mediaFiles['css'], RootREL . 'media/css/post.css');
 array_push($mediaFiles['js'], RootREL . 'media/js/comment.js');
 
-$post = $this->record;
+$data = $this->record;
 $isLoggedIn = isset($_SESSION['user']);
 ?>
 
@@ -14,7 +14,7 @@ $isLoggedIn = isset($_SESSION['user']);
     <?php include_once "views/components/posts/postHeader.php" ?>
 
     <article class="content pt-4 pb-5">
-        <?= htmlspecialchars_decode($this->record['content']) ?>
+        <?= htmlspecialchars_decode($data['post']['content']) ?>
     </article>
 
     <div class="comments" style="max-width: 800px;">
@@ -23,11 +23,11 @@ $isLoggedIn = isset($_SESSION['user']);
             <div id="comment-items"></div>
         </div>
         <button id="load-more-comments" class="btn btn-outline-secondary my-3"
-                onclick="CommentModule.loadComment(<?= (int)$post['id'] ?>)"
+                onclick="CommentModule.loadComment(<?= (int)$data['post']['id'] ?>)"
                 style="border: 0;">
             Load More Comments
         </button>
-        <?php $postId = $this->record['id']; include "views/components/posts/commentForm.php" ?>
+        <?php $postId = $data['post']['id']; include "views/components/posts/commentForm.php" ?>
     </div>
     <?php $recommendedPosts = $this->recommendedPosts; include "views/components/posts/recommendedPosts.php" ?>
 </section>

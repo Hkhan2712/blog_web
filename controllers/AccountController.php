@@ -5,7 +5,7 @@ class AccountController extends MainController {
         AuthMiddleware::check();
         $pm = PostModel::getInstance();
         $userId = $_SESSION['user']['id'] ?? 0;
-        $this->posts = $pm->getPostsByUserId($userId);
+        $this->posts = PURepository::getPostsByUserId($userId)['posts'] ?? [];
         $this->display();
     }
     public function edit() {
