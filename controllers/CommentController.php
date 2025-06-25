@@ -1,57 +1,7 @@
 <?php 
 class CommentController extends MainController {
-    public function add() {
+    public function store() {
         header('Content-Type: application/json');
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405); 
-            echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
-            return;
-        }
-        $data = json_decode(file_get_contents("php://input"), true);
-        $postId = isset($data['postId']) ? (int)$data['postId'] : 0;
-        $content = isset($data['content']) ? trim($data['content']) : ''; 
-        $userId = $_SESSION['user']['id'] ?? 0;
-        if (!$postId || !$content || !$userId) {
-            http_response_code(400); 
-            echo json_encode(
-                ['success' => false, 
-                 'message' => 'Invalid post id, user id or missing content', 
-                 'json' => [
-                    'postId' => $postId,
-                    'userId' => $userId,
-                    'content' => $content
-                 ]
-                ]
-            );
-            return;
-        }
-        $m = CommentModel::getInstance();
-        $result = $m->addComment($userId, $postId, $content);
-        if ($result) {
-            $authorName = $_SESSION['user']['username'] ?? 'Unknown';
-            $avatarUrl = !empty($_SESSION['user']['avatar_url']) 
-                ? $_SESSION['user']['avatar_url'] 
-                : "avatar-default.png";
-            echo json_encode([
-                'success' => true,
-                'message' => 'Comment added successfully.',
-                'data' => [
-                    'id' => $result,
-                    'author' => htmlspecialchars($authorName),
-                    'avatar' => $avatarUrl,
-                    'created_at' => date('F d, Y'), 
-                    'content' => htmlspecialchars($content),
-                ]
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to add comment.']);
-        }
-    }
-
-    public function reply() {
-        header('Content-Type: application/json');
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -59,64 +9,61 @@ class CommentController extends MainController {
         }
 
         $data = json_decode(file_get_contents("php://input"), true);
-        $parentId = intval($data['commentId'] ?? 0);
-        $postId = intval($data['postId'] ?? 0);
+        $postId = (int)($data['postId'] ?? 0);
+        $parentId = (int)($data['parentId'] ?? 0);
         $content = trim($data['content'] ?? '');
+        $userId = (int)$_SESSION['user']['id'];
 
-        if (!$parentId || !$postId || !$content) {
+        if (!$postId || !$content || !$userId) {
             http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Missing or invalid data',
-                'debug' => compact('parentId', 'postId', 'content')
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Invalid post id, user id or missing content']);
             return;
         }
-
         $cm = CommentModel::getInstance();
         $commentId = $cm->addRecord([
             'post_id' => $postId,
             'parent_id' => $parentId,
-            'user_id' => $_SESSION['user']['id'],
+            'user_id' => $userId,
             'content' => $content
         ]);
         if (!$commentId) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to add reply.']);
+            echo json_encode(['success' => false, 'message' => 'Failed to add comment.']);
             return;
-        } else {
-            $cm->incrementCommentQuantity($postId);
         }
 
-        $parent = $cm->getRecordWhere(['id' => $parentId]);
-        if ($parent) {
-            $basePath = isset($parent['path']) && $parent['path'] !== ''
-                ? $parent['path']
-                : $parent['id'];
-            $path = $basePath . '/' . $commentId;
+        if ($parentId) {
+            $parent = $cm->getRecordWhere(['id' => $parentId]);
+            $path = $parent && !empty($parent['path']) ? $parent['path'] . "/$commentId" : "$parentId/$commentId";
         } else {
-            $path = (string)$commentId;
+            $path = "$commentId";
         }
         $cm->updatePath($commentId, $path);
-
-        echo json_encode([
-            'success' => true,
-            'data' => [
-                'id' => $commentId,
-                'postId' => $postId,
-                'path' => $path,
-                'created_at' => date('F d, Y'),
-                'author' => htmlspecialchars($_SESSION['user']['username'] ?? 'You'),
-                'avatar' => !empty($_SESSION['user']['avatar_url'])
-                    ? $_SESSION['user']['avatar_url']
-                    : "avatar-default.png",
-                'content' => htmlspecialchars($content),
+        $cm->incrementCommentQuantity($postId);
+        echo json_encode(
+            [
+                'success' => true,
+                'message' => 'Comment added successfully.',
+                'data' => [
+                    'id' => $commentId,
+                    'postId' => $postId,
+                    'path' => $path,
+                    'created_at' => date('F d, Y'),
+                    'author' => htmlspecialchars($_SESSION['user']['username'] ?? 'You'),
+                    'avatar' => !empty($_SESSION['user']['avatar_url'])
+                        ? $_SESSION['user']['avatar_url']
+                        : "default.png",
+                    'content' => htmlspecialchars($content),
+                    'parent_id' => $parentId
+                ]
             ]
-        ]);
+        );
+
     }
-    public function loadComment() {
+
+    public function load() {
         header('Content-Type: application/json');
-        
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Invalid request method']);
@@ -124,43 +71,27 @@ class CommentController extends MainController {
         }
 
         $data = json_decode(file_get_contents("php://input"), true);
-        $postId = intval($data['postId']) ?? 0;
-        $offset = intval($data['offset']) ?? 0;
-        $limit = intval($data['limit']) ?? 0;
-
-        if (!$postId) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid post id']);
-            return;
-        }
-
-        $m = CommentModel::getInstance();
-        $comments = $m->getCommentsWithPagination($postId, $limit, $offset);
-
-        echo json_encode(['success' => true, 'data' => $comments]);
-    }
-    public function loadRep() {
-        header('Content-Type: application/json');
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo json_encode(['success' => false, 'message' => 'Invalid request']);
-            return;
-        }
-
-        $data = json_decode(file_get_contents("php://input"), true);
-        $commentId = intval($data['commentId'] ?? 0);
-        $offset = intval($data['offset'] ?? 0);
-        $limit = intval($data['limit'] ?? 5);
-
-        if (!$commentId) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Missing commentId']);
-            return;
-        }
+        $postId = (int)($data['postId'] ?? 0);
+        $parentId = isset($data['parentId']) ? (int)$data['parentId'] : null;
+        $offset = (int)($data['offset'] ?? 0);
+        $limit = (int)($data['limit'] ?? 5);
 
         $cm = CommentModel::getInstance();
-        $replies = $cm->getRepliesWithPagination($commentId, $limit, $offset);
 
-        echo json_encode(['success' => true, 'data' => $replies]);
+        if ($parentId) {
+            $comments = $cm->getRepliesWithPagination($parentId, $limit, $offset);
+        } else {
+            if (!$postId) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Missing post ID']);
+                return;
+            }
+            $comments = $cm->getCommentsWithPagination($postId, $limit, $offset);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => $comments
+        ]);
     }
 }

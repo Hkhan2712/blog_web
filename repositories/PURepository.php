@@ -17,11 +17,17 @@ class PURepository {
         } else $data = false;
         return $data;
     }
-    public static function getUserByPostId($postId) {
+    public static function getUserByPostId($postId, $fields = ['id', 'username', 'email']) {
+
         $post = PostModel::getInstance()->getRecord($postId);
         if (!$post) return false;
 
-        $user = UserModel::getInstance()->getRecord($post['user_id']);
+        $safeFields = array_map(function($field) {
+            return preg_replace('/[^a-zA-Z0-9_]/', '', $field);
+        }, $fields);
+
+        $fieldList = implode(',', $safeFields);
+        $user = UserModel::getInstance()->getRecord($post['user_id'], $fieldList);
         if ($user) return $user;
         else return false;
     }

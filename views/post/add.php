@@ -36,8 +36,7 @@
 </div>
 
 <!-- TinyMCE -->
-<script src="https://cdn.tiny.cloud/1/bywwhzmxbuun804w7e7tkx0er4yfhcyylwb466fksk4l8m3r/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-
+<script src="https://cdn.tiny.cloud/1/bywwhzmxbuun804w7e7tkx0er4yfhcyylwb466fksk4l8m3r/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <?php $uploadUrl = AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']); ?>
 
 <script>

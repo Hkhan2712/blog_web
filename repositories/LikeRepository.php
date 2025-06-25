@@ -1,16 +1,11 @@
 <?php
 class LikeRepository {
-    protected $con;
-    
-    public function __construct($con) {
-        $this->con = $con;
-    }
+    public static function checkExist($userId, $entityId, $entityType = 'post') {
+        if (!$userId || !$entityId || !in_array($entityType, ['post', 'comment'])) {
+            return false;
+        }
 
-    public function hasUserLikedPost($postId, $userId) {
-        $sql = "SELECT id FROM likes WHERE entity_id = ? AND user_id = ? AND entity_type = 'post' LIMIT 1";
-        $stmt = $this->con->prepare($sql);
-        $stmt->bind_param("ii", $postId, $userId);
-        $stmt->execute();
-        return $stmt->get_result()->num_rows > 0;
+        $entityType = preg_replace('/[^a-zA-Z0-9_]/', '', $entityType);
+        return LikeModel::getInstance()->checkExist($userId, $entityId, $entityType);
     }
 }

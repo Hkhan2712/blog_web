@@ -1,41 +1,7 @@
 <?php
-
-use Dom\Comment;
-
 class LikeController extends MainController
 {
-    public function add()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = json_decode(file_get_contents("php://input"), true);
-            $postId = isset($data['postId']) ? (int)$data['postId'] : 0;
-            $userId = (int)$_SESSION['user']['id'] ?? 0;
-            if ($postId && $userId) {
-                $m = LikeModel::getInstance();
-                $result = $m->like($userId, $postId, 'post');
-
-                if ($result) {
-                    $totalLikes = $m->countLikesForPost($postId);
-
-                    $postModel = PostModel::getInstance();
-                    $postModel->editRecord(['id' => $postId], ['like_quantity' => $totalLikes]);
-
-                    header('Content-Type: application/json');
-                    http_response_code(200);
-                    echo json_encode(['success' => true, 'like_quantity' => $totalLikes]);
-                } else {
-                    echo json_encode(['success' => false, 'message' => 'Failed to like the post or already liked.']);
-                }
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Invalid post or user ID.']);
-            }
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
-        }
-    }
-
-    public function addLikeCm()
-    {
+    public function like() {
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -43,27 +9,69 @@ class LikeController extends MainController
             echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
             return;
         }
-
+        $userId = $_SESSION['user']['id'] ?? 0;
         $data = json_decode(file_get_contents("php://input"), true);
-        $commentId = isset($data['commentId']) ? (int)$data['commentId'] : 0;
-        $userId = (int)($_SESSION['user']['id'] ?? 0);
-        if (!$commentId || !$userId) {
-            echo json_encode(['success' => false, 'message' => 'Invalid comment or user ID.']);
+        $entityId = isset($data['id']) ? (int)$data['id'] : 0;
+        $entityType = isset($data['type']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $data['type']) : 'post';
+        if (!$entityId || !$userId || !in_array($entityType, ['post', 'comment'])) {
+            echo json_encode(['success' => false, 'message' => 'Invalid data', 'data' => $data]);
             return;
         }
 
         $m = LikeModel::getInstance();
-        $result = $m->like($userId, $commentId, 'comment');
-
+        $result = $m->add($userId, $entityId, $entityType);
         if ($result) {
-            $totalLikes = $m->countLikesForComment($commentId);
+            $totalLikes = $m->countLike($entityId, $entityType);
 
-            $cmModel = CommentModel::getInstance();
-            $cmModel->editRecord(['id' => $commentId], ['like_quantity' => $totalLikes]);
+            if ($entityType === 'post') {
+                $entityModel = PostModel::getInstance();
+            } else {
+                $entityModel = CommentModel::getInstance();
+            }
+
+            $entityModel->editRecord(['id' => $entityId], ['like_quantity' => $totalLikes]);
 
             echo json_encode(['success' => true, 'like_quantity' => $totalLikes]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to like the comment or already liked.']);
+            echo json_encode(['success' => false, 'message' => 'Failed to like the entity or already liked.']);
+        }
+    }
+
+    public function unlike()
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
+            return;
+        }
+        $userId = $_SESSION['user']['id'] ?? 0;
+        $data = json_decode(file_get_contents("php://input"), true);
+        $entityId = isset($data['id']) ? (int)$data['id'] : 0;
+        $entityType = isset($data['type']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $data['type']) : 'post';
+        if (!$entityId || !$userId || !in_array($entityType, ['post', 'comment'])) {
+            echo json_encode(['success' => false, 'message' => 'Invalid data.', 'data' => $data]);
+            return;
+        }
+
+        $likeModel = LikeModel::getInstance();
+        $result = $likeModel->remove($userId, $entityId, $entityType);
+
+        if ($result) {
+            $totalLikes = $likeModel->countLike($entityId, $entityType);
+
+            if ($entityType === 'post') {
+                $entityModel = PostModel::getInstance();
+            } else {
+                $entityModel = CommentModel::getInstance();
+            }
+
+            $entityModel->editRecord(['id' => $entityId], ['like_quantity' => $totalLikes]);
+
+            echo json_encode(['success' => true, 'like_quantity' => $totalLikes]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to unlike or not liked before.']);
         }
     }
 }

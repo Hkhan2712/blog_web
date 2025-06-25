@@ -15,10 +15,10 @@ class PostController extends MainController
         $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
         $offset = ($page -1) * $limit;
 
-        $totalPosts = $m->countAllPosts();
+        $totalPosts = $m->getCountRecords();;
         $this->totalPages = ceil($totalPosts / $limit);
         $this->currentPage = $page;
-        $this->listPosts = $m->getListPostsPaginate($limit, $offset);
+        $this->listPosts = PostRepository::getPaginatedPosts($limit, $offset);
         $this->display();
     }
 
@@ -31,7 +31,7 @@ class PostController extends MainController
             header('HTTP/1.0 404 Not Found');
             exit('User not found');
         }   
-        $this->record['post'] = PostModel::getInstance()->getRecord((int)$id);
+        $this->record['post'] = $pm->getRecord((int)$id);
         $this->recommendedPosts = PostRepository::getRecommendedPosts($id);
         $userId = $_SESSION['user']['id'] ?? 0;
         $this->display();

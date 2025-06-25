@@ -47,4 +47,20 @@ class PostRepository
         }
         return $data;
     }
+    public static function getPaginatedPosts($limit = 10, $offset = 0)
+    {
+        $data = PostModel::getInstance()->getRecordsAdvanced('*', [], [
+            'order' => 'created_at DESC',
+            'limit' => $limit,
+            'offset' => $offset
+        ]);
+        foreach ($data as &$post) {
+            $post['user'] = PURepository::getUserByPostId($post['id']);
+            if (!$post['user']) {
+                header('HTTP/1.0 404 Not Found');
+                exit('User not found for one of the paginated posts.');     
+            }
+        }
+        return $data;
+    }
 }

@@ -11,7 +11,7 @@
             <div class="mb-3">
                 <textarea id="comment-content" class="form-control" name="content" rows="3" required placeholder="Write your comment here..."></textarea>
             </div>
-            <button type="button" id="comment-btn" onclick="CommentModule.commentPost(<?= (int)$postId ?>)" class="btn btn-primary">Submit Comment</button>
+            <button type="submit" class="btn btn-primary">Submit Comment</button>
         </form>
     </div>
 <?php endif; ?>

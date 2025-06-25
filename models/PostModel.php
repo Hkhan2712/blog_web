@@ -30,24 +30,6 @@ class PostModel extends FrapModel {
 	    ];
     }
 
-    public function countAllPosts() {
-        $sql = "SELECT COUNT(1) as total FROM posts";
-        $result = $this->con->query($sql);
-        $row = $result->fetch_assoc();
-        return (int)$row['total'];
-    }
-
-    public function getListPostsPaginate($limit, $offset) {
-        $sql = "SELECT posts.*, users.username AS author_name
-                FROM posts
-                JOIN users ON posts.user_id = users.id
-                ORDER BY posts.created_at DESC
-                LIMIT ? OFFSET ?";
-        $stmt = $this->con->prepare($sql);
-        $stmt->bind_param("ii", $limit, $offset);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    }
     public function getRecordsWhereNotId($excludePostId, $limit = 3) {
         $sql = "SELECT * FROM posts WHERE id != ? ORDER BY created_at DESC LIMIT ?";
         $stmt = $this->con->prepare($sql);

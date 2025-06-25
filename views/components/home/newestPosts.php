@@ -36,7 +36,7 @@
                     </span>
                 </div>
                 
-                <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]])?>" class="h4"><?=$post['title']?></a>
+                <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'view', 'params' => [$post['id']]])?>" class="h4"><?=htmlspecialchars(mb_strimwidth(strip_tags($post['title']), 0, 60, ' ...'))?></a>
                 <div class="d-flex gap-2">
                     <?php foreach (array_slice($tags, 0 ,2) as $tag): ?>
                         <span class="tag"><?= htmlspecialchars($tag['name']) ?></span>

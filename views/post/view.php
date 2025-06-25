@@ -2,12 +2,11 @@
 /** @var array $mediaFiles */
 global $mediaFiles;
 array_push($mediaFiles['css'], RootREL . 'media/css/post.css');
+array_push($mediaFiles['js'], RootREL . 'media/js/like.js');
 array_push($mediaFiles['js'], RootREL . 'media/js/comment.js');
-
 $data = $this->record;
 $isLoggedIn = isset($_SESSION['user']);
 ?>
-
 <?php include_once "views/layouts/user/header.php" ?>
 
 <section class="container py-5">
@@ -23,7 +22,7 @@ $isLoggedIn = isset($_SESSION['user']);
             <div id="comment-items"></div>
         </div>
         <button id="load-more-comments" class="btn btn-outline-secondary my-3"
-                onclick="CommentModule.loadComment(<?= (int)$data['post']['id'] ?>)"
+                onclick="CommentModule.init(<?= (int)$data['post']['id'] ?>)"
                 style="border: 0;">
             Load More Comments
         </button>
@@ -33,13 +32,17 @@ $isLoggedIn = isset($_SESSION['user']);
 </section>
 
 <script>
-    const likeUrl = '<?= AppUtil::url(['ctl' => 'like', 'act' => 'add']) ?>';
-    const likeCmUrl = '<?= AppUtil::url(['ctl' => 'like', 'act' => 'addLikeCm']) ?>';
-    const currentUserId = <?= $isLoggedIn ? (int)$_SESSION['user']['id'] : 0 ?>;
-    const commentUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'add']) ?>';
-    const replyUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'reply']) ?>';
-    const loadReplyUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'loadRep'])?>';
-    const commentLoadUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'loadComment'])?>';
-
+    const likeUrl = '<?= AppUtil::url(['ctl' => 'like', 'act' => 'like']) ?>';
+    const unlikeUrl = '<?= AppUtil::url(['ctl' => 'like', 'act' => 'unlike']) ?>';
+    const storeCmUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'store']) ?>';
+    const loadCmUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'load']) ?>';
+    const currentUserId = <?= isset($_SESSION['user']['id']) ? (int)$_SESSION['user']['id'] : 0 ?>;
+    
 </script>
 <?php include_once "views/layouts/user/footer.php" ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        CommentModule.init('<?= (int)$data['post']['id'] ?>');
+        CommentModule.loadMoreComments(<?= (int)$data['post']['id'] ?>);
+    });
+</script>

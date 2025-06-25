@@ -17,37 +17,45 @@ class LikeModel extends CrudModel {
         ];
     }
 
-    public function like($userId, $entityId, $entityType = 'post') {
-        // Check if the user has already liked the post
+    public function add($userId, $entityId, $entityType = 'post') {
         $existingLike = $this->getRecord(['user_id' => $userId, 'entity_id' => $entityId, 'entity_type' => $entityType]);
         if ($existingLike) {
-            return false; // User has already liked this post
+            return false; 
         }
-
-        // Insert new like
         return $this->addRecord([
             'user_id' => $userId,
             'entity_id' => $entityId,
             'entity_type' => $entityType
         ]);
     }
-    public function countLikesForPost($postId)
-    {
-        $sql = "SELECT COUNT(1) as total FROM $this->table WHERE entity_id = ? AND entity_type = 'post'";
+    public function remove($userId, $entityId, $entityType = 'post') {
+        $existingLike = $this->getRecord(['user_id' => $userId, 'entity_id' => $entityId, 'entity_type' => $entityType]);
+        if (!$existingLike) {
+            return false; 
+        }
+        return $this->delRecord($existingLike['id']);
+    }
+
+    public function countLike($entityId, $entityType = 'post') {
+        $sql = "SELECT COUNT(1) as total FROM $this->table WHERE entity_id = ? AND entity_type = ?";
         $stmt = $this->con->prepare($sql);
-        $stmt->bind_param("i", $postId);
+        $stmt->bind_param("is", $entityId, $entityType);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
         return (int)$row['total'];
     }
-    public function countLikesForComment($commentId) {
-        $sql = "SELECT count(1) as total from $this->table where entity_id=? and entity_type='comment'";
+    public function checkExist($userId, $entityId, $entityType) {
+        $userId = (int)$userId;
+        $entityId = (int)$entityId;
+        $entityType = $this->con->real_escape_string($entityType);
+
+        $sql = "SELECT id FROM likes WHERE user_id = ? AND entity_id = ? AND entity_type = ? LIMIT 1";
         $stmt = $this->con->prepare($sql);
-        $stmt->bind_param("i", $commentId);
+        $stmt->bind_param("iis", $userId, $entityId, $entityType);
         $stmt->execute();
         $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        return (int)$row['total'];
+
+        return $result->num_rows > 0;
     }
 }

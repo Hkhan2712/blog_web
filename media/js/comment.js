@@ -1,39 +1,28 @@
 const CommentModule = (() => {
+    const api = {
+        store: storeCmUrl,
+        load: loadCmUrl,
+    };
+
     const selectors = {
         commentList: ".comment-list",
         commentCount: "#comment-count",
         commentForm: "#comment-form",
         commentContent: "#comment-content",
-        repliesContainer: (commentId) => `#replies-${commentId}`,
-        replyForm: (commentId) => `#reply-form-${commentId}`,
-        commentItem: (id) => `#comment-${id}`,
-        replyItem: (id) => `#reply-${id}`
+        repliesContainer: id => `#replies-${id}`,
+        replyForm: id => `#reply-form-${id}`,
+        commentItem: id => `#comment-${id}`,
+        replyItem: id => `#reply-${id}`
     };
 
-    const apiUrls = {
-        comment: commentUrl,     
-        reply: replyUrl,         
-        likePost: likeUrl,       
-        likeComment: likeCmUrl,  
-        loadReply: loadReplyUrl,
-        commentLoad: commentLoadUrl
-    };
-
-    function updateCommentCount(increment = 1) {
-        const countElement = document.querySelector(selectors.commentCount);
-        if (countElement) {
-            let current = parseInt(countElement.textContent);
-            countElement.textContent = current + increment;
-        }
-    }
-
-    function createCommentHTML(comment) {
-        const createdAt = new Date(comment.created_at).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: '2-digit'
-        });
-        return `
+    const UI = {
+        renderComment(comment) {
+            const createdAt = new Date(comment.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: '2-digit'
+            });
+            return `
             <div class="comment-item mb-3" id="comment-${comment.id}">
                 <div class="d-flex gap-3 align-items-start">
                     <div class="avatar">
@@ -70,10 +59,10 @@ const CommentModule = (() => {
                 <hr>
             </div>
         `;
-    }
+        },
 
-    function createReplyHTML(reply) {
-        const createdAt = new Date(reply.created_at).toLocaleDateString('en-US', {
+        renderReply(reply) {
+            const createdAt = new Date(reply.created_at).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: '2-digit'
@@ -105,189 +94,142 @@ const CommentModule = (() => {
                 <div class="replies ms-5" id="replies-${reply.id}"></div>
             </div>
         `;
-    }
+        },
 
-    async function commentPost(postId) {
-        const content = document.querySelector(selectors.commentContent).value.trim();
-        if (!content) return alert("Comment cannot be empty");
-        console.log(selectors.commentContent);
-        const response = await fetch(apiUrls.comment, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId, content })
-        });
-        const result = await response.json();
+        updateCommentCount(delta = 1) {
+            const el = document.querySelector(selectors.commentCount);
+            if (el) el.textContent = parseInt(el.textContent) + delta;
+        },
 
-        if (result.success) {
-            document.querySelector(selectors.commentList).insertAdjacentHTML("afterend", createCommentHTML(result.data));
-            document.querySelector(selectors.commentContent).value = "";
-            updateCommentCount();
-        } else {
-            alert(result.json && result.message || "Failed to add comment");
-        }
-    }
-
-    function showReplyForm(commentId, postId) {
-        const container = document.querySelector(selectors.repliesContainer(commentId));
-        if (!container) return;
-
-        // If already has form → focus
-        if (document.querySelector(selectors.replyForm(commentId))) {
-            document.querySelector(`${selectors.replyForm(commentId)} textarea`).focus();
-            return;
-        }
-
-        const formHTML = `
-            <form id="reply-form-${commentId}" 
-                  onsubmit="CommentModule.replyComment(event, ${postId}, ${commentId})" class="mt-2">
-                <div class="mb-2">
-                    <textarea class="form-control" rows="2" required placeholder="Write a reply..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-sm btn-primary">Submit Reply</button>
-                <button type="button" class="btn btn-sm btn-secondary ms-2" onclick="CommentModule.removeReplyForm(${commentId})">Cancel</button>
-            </form>
-        `;
-        container.insertAdjacentHTML("afterbegin", formHTML);
-    }
-
-    function removeReplyForm(commentId) {
-        const form = document.querySelector(selectors.replyForm(commentId));
-        if (form) form.remove();
-    }
-
-    async function replyComment(event, postId, commentId) {
-        event.preventDefault();
-        const textarea = event.target.querySelector("textarea");
-        const content = textarea.value.trim();
-        if (!content) return alert("Reply cannot be empty");
-
-        const response = await fetch(apiUrls.reply, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId, commentId: commentId, content })
-        });
-        const result = await response.json();
-
-        if (result.success) {
-            document.querySelector(selectors.repliesContainer(commentId)).insertAdjacentHTML("beforeend", createReplyHTML(result.data));
-            removeReplyForm(commentId);
-        } else {
-            alert(result.message || "Failed to add reply");
-        }
-    }
-
-    async function likePost(postId) {
-        const response = await fetch(apiUrls.likePost, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId : postId })
-        });
-        const result = await response.json();
-
-        if (result.success) {
-            const likeCountEl = document.querySelector("#like-count");
-            if (likeCountEl) likeCountEl.textContent = parseInt(likeCountEl.textContent) + 1;
-            const btn = document.querySelector("#like-btn");
-            if (btn) {
-                btn.classList.remove("btn-outline-primary");
-                btn.classList.add("btn-primary");
-                btn.disabled = true;
-                btn.querySelector(".like-text").textContent = "Liked";
+        showReplyForm(commentId, postId) {
+            const container = document.querySelector(selectors.repliesContainer(commentId));
+            if (!container) return;
+            if (document.querySelector(selectors.replyForm(commentId))) {
+                document.querySelector(`${selectors.replyForm(commentId)} textarea`).focus();
+                return;
             }
-        } else {
-            alert(result.message || "Failed to like post");
+            container.insertAdjacentHTML("afterbegin", `
+                <form id="reply-form-${commentId}" onsubmit="CommentModule.handleReply(event, ${postId}, ${commentId})" class="mt-2">
+                    <textarea class="form-control mb-2" rows="2" required placeholder="Write a reply..."></textarea>
+                    <button class="btn btn-sm btn-primary">Submit</button>
+                    <button type="button" class="btn btn-sm btn-secondary ms-2" onclick="CommentModule.removeReplyForm(${commentId})">Cancel</button>
+                </form>
+            `);
+        },
+
+        removeReplyForm(commentId) {
+            const form = document.querySelector(selectors.replyForm(commentId));
+            if (form) form.remove();
         }
-    }
+    };
 
-    async function likeComment(commentId) {
-        const response = await fetch(apiUrls.likeComment, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ commentId: commentId })
-        });
-        const result = await response.json();
-
-        if (result.success) {
-            const btn = document.querySelector(`#like-comment-${commentId}`);
-            if (btn) {
-                btn.classList.remove("btn-outline-secondary");
-                btn.classList.add("btn-primary");
-                btn.disabled = true;
-            }
-        } else {
-            alert(result.message || "Failed to like comment");
-        }
-    }
-
-    async function loadComment(postId, offset = 0, limit = 5) {
-        const response = await fetch(commentLoadUrl, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId, offset, limit })
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            const listContainer = document.querySelector("#comment-items"); 
-            const loadMoreBtn = document.querySelector("#load-more-comments");
-
-            result.data.forEach(comment => {
-                listContainer.insertAdjacentHTML("beforeend", createCommentHTML(comment));
+    const Service = {
+        async postComment(postId, content) {
+            const res = await fetch(api.store, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, content })
             });
+            return res.json();
+        },
 
-            if (result.data.length < limit) {
-                loadMoreBtn.style.display = "none";
-            } else {
-                loadMoreBtn.setAttribute("onclick", `CommentModule.loadComment(${postId}, ${offset + limit}, ${limit})`);
-            }
-        } else {
-            alert(result.message || "Failed to load comments");
-        }
-    }
+        async replyToComment(postId, commentId, content) {
+            const res = await fetch(api.store, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, parentId: commentId, content })
+            });
+            return res.json();
+        },
 
-    async function loadReplies(commentId, offset = 0, limit = 5) {
-        const repliesContainer = document.querySelector(selectors.repliesContainer(commentId));
-        const btn = document.querySelector(`#show-replies-${commentId}`);
-        if (!repliesContainer || !btn) return;
+        async loadComments(postId, offset = 0, limit = 5) {
+            const res = await fetch(api.load, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, offset, limit })
+            });
+            return res.json();
+        },
 
-        btn.textContent = "Loading...";
-
-        try {
-            const response = await fetch(apiUrls.loadReply, {
+        async loadReplies(commentId, offset = 0, limit = 5) {
+            const res = await fetch(api.load, {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ commentId, offset, limit })
             });
-            const result = await response.json();
+            return res.json();
+        }
+    };
+
+    const Events = {
+        async handleCommentSubmit(event, postId) {
+            event.preventDefault();
+            const content = document.querySelector(selectors.commentContent).value.trim();
+            if (!content) return alert("Comment cannot be empty");
+
+            const result = await Service.postComment(postId, content);
             if (result.success) {
-                result.data.forEach(reply => {
-                    repliesContainer.insertAdjacentHTML("beforeend", createReplyHTML(reply));
-                });
-                if (result.data.length < limit) {
-                    btn.remove(); 
-                } else {
+                document.querySelector(selectors.commentList)
+                        .insertAdjacentHTML("afterend", UI.renderComment(result.data));
+                document.querySelector(selectors.commentContent).value = "";
+                UI.updateCommentCount(1);
+            } else {
+                alert(result.message || "Failed to add comment");
+            }
+        },
+
+        async handleReply(event, postId, commentId) {
+            event.preventDefault();
+            const textarea = event.target.querySelector("textarea");
+            const content = textarea.value.trim();
+            if (!content) return alert("Reply cannot be empty");
+
+            const result = await Service.replyToComment(postId, commentId, content);
+            if (result.success) {
+                document.querySelector(selectors.repliesContainer(commentId))
+                    .insertAdjacentHTML("beforeend", UI.renderReply(result.data));
+                UI.removeReplyForm(commentId);
+            } else {
+                alert(result.message || "Failed to add reply");
+            }
+        },
+
+        async loadMoreComments(postId, offset = 0, limit = 5) {
+            const result = await Service.loadComments(postId, offset, limit);
+            if (result.success) {
+                const container = document.querySelector("#comment-items");
+                result.data.forEach(c => container.insertAdjacentHTML("beforeend", UI.renderComment(c)));
+            }
+        },
+
+        async loadMoreReplies(commentId, offset = 0, limit = 5) {
+            const btn = document.querySelector(`#show-replies-${commentId}`);
+            const container = document.querySelector(selectors.repliesContainer(commentId));
+            btn.textContent = "Loading...";
+            const result = await Service.loadReplies(commentId, offset, limit);
+            if (result.success) {
+                result.data.forEach(r => container.insertAdjacentHTML("beforeend", UI.renderReply(r)));
+                if (result.data.length < limit) btn.remove();
+                else {
                     btn.textContent = "Load More Replies";
-                    btn.setAttribute("onclick", `CommentModule.loadReplies(${commentId}, ${offset + limit}, ${limit})`);
+                    btn.setAttribute("onclick", `CommentModule.loadMoreReplies(${commentId}, ${offset + limit}, ${limit})`);
                 }
             } else {
-                btn.textContent = "Load More Replies";
-                alert(result.message || "Failed to load replies");
+                alert("Failed to load replies");
             }
-        } catch (e) {
-            btn.textContent = "Load More Replies";
-            alert("Failed to load replies");
-        }
-    }
+        },
 
+        init(postId) {
+            document.querySelector(selectors.commentForm)
+                .addEventListener("submit", e => Events.handleCommentSubmit(e, postId));
+        }
+    };
 
     return {
-        commentPost,
-        showReplyForm,
-        removeReplyForm,
-        replyComment,
-        likePost,
-        likeComment,
-        loadComment,
-        loadReplies
+        init: Events.init,
+        showReplyForm: UI.showReplyForm,
+        removeReplyForm: UI.removeReplyForm,
+        handleReply: Events.handleReply,
+        loadMoreReplies: Events.loadMoreReplies
     };
 })();

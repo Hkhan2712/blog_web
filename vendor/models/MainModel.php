@@ -80,13 +80,13 @@ class MainModel {
             if (strpos($options['group'], '.') !== false) {
                 $group .= $options['group'];
             } else $group .= $this->table.".".$options['group'];
-            $sql = "SELECT COUNT(*) as total from (SELECT ".$options['group']." FROM ".$this->table.$join.$conditions.$group.") as SUBQUERY";
+            $sql = "SELECT COUNT(1) as total from (SELECT ".$options['group']." FROM ".$this->table.$join.$conditions.$group.") as SUBQUERY";
         } else if (isset($options['total-distinct']) && $options['total-distinct']) {
             $sql = "SELECT COUNT(DISTINCT ".$this->table." id) as total FROM ".$this->table.$join.$conditions;
             preg_match('/(.*)(GROUP BY.*)/', $sql, $matches);
             $sql = $matches[1];
         } else {
-            $sql = "SELECT COUNT(*) as total FROM ". $this->table.$join.$conditions;
+            $sql = "SELECT COUNT(1) as total FROM ". $this->table.$join.$conditions;
         }
         $result = $this->con->query($sql);
         return $result->fetch_assoc()['total'];
@@ -259,7 +259,7 @@ class MainModel {
     }
 
     public function getCountWhere($wheres) {
-        $sql = "COUNT(*) AS total FROM {$this->table} WHERE ";
+        $sql = "COUNT(1) AS total FROM {$this->table} WHERE ";
         $i = 0;
         foreach ($wheres as $k => $v) {
             $sql .= (($i) ? " AND ":""). $k ."='".$v."'";
@@ -500,7 +500,7 @@ class MainModel {
             $params[] = '%' . $keyword . '%';
         }
 
-        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE " . implode(" OR ", $likeClauses);
+        $sql = "SELECT COUNT(1) as total FROM {$this->table} WHERE " . implode(" OR ", $likeClauses);
 
         $stmt = $this->con->prepare($sql);
 
