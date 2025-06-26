@@ -1,14 +1,14 @@
 const LikeModule = (() => {
-    const urls = {
-        like: likeUrl,
-        unlike: unlikeUrl,
+    const api = {
+        like: urls.like,
+        unlike: urls.unlike,
     };
     const toggleLike = (entityId, entityType = 'post', btn) => { 
         if (!btn) return;
 
         const isLiked = btn.getAttribute('data-liked') === '1';
-        const url = isLiked ? urls.unlike : urls.like;
-        
+        const url = isLiked ? api.unlike : api.like;
+
         const payload = {
             id: entityId,
             type: entityType

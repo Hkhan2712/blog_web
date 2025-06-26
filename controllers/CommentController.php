@@ -35,6 +35,7 @@ class CommentController extends MainController {
         if ($parentId) {
             $parent = $cm->getRecordWhere(['id' => $parentId]);
             $path = $parent && !empty($parent['path']) ? $parent['path'] . "/$commentId" : "$parentId/$commentId";
+            $cm->incrementCommentQuantityOfParent($parentId);
         } else {
             $path = "$commentId";
         }
@@ -75,9 +76,7 @@ class CommentController extends MainController {
         $parentId = isset($data['parentId']) ? (int)$data['parentId'] : null;
         $offset = (int)($data['offset'] ?? 0);
         $limit = (int)($data['limit'] ?? 5);
-
         $cm = CommentModel::getInstance();
-
         if ($parentId) {
             $comments = $cm->getRepliesWithPagination($parentId, $limit, $offset);
         } else {
@@ -88,7 +87,10 @@ class CommentController extends MainController {
             }
             $comments = $cm->getCommentsWithPagination($postId, $limit, $offset);
         }
-
+        foreach ($comments as &$comment) {
+            $comment['is_liked'] = CommentModel::checkLiked($comment['id'], $_SESSION['user']['id'] ?? 0);  
+        }
+        
         echo json_encode([
             'success' => true,
             'data' => $comments

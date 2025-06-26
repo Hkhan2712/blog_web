@@ -2,10 +2,12 @@
 /** @var array $mediaFiles */
 global $mediaFiles;
 array_push($mediaFiles['css'], RootREL . 'media/css/post.css');
+array_push($mediaFiles['js'], RootREL . 'media/js/config.js');
 array_push($mediaFiles['js'], RootREL . 'media/js/like.js');
 array_push($mediaFiles['js'], RootREL . 'media/js/comment.js');
 $data = $this->record;
 $isLoggedIn = isset($_SESSION['user']);
+// var_dump($data['post']); exit;
 ?>
 <?php include_once "views/layouts/user/header.php" ?>
 
@@ -22,27 +24,18 @@ $isLoggedIn = isset($_SESSION['user']);
             <div id="comment-items"></div>
         </div>
         <button id="load-more-comments" class="btn btn-outline-secondary my-3"
-                onclick="CommentModule.init(<?= (int)$data['post']['id'] ?>)"
+                onclick="CommentModule.load(<?= (int)$data['post']['id'] ?>, 0, 5)"
                 style="border: 0;">
             Load More Comments
         </button>
-        <?php $postId = $data['post']['id']; include "views/components/posts/commentForm.php" ?>
+        <?php include_once "views/components/posts/commentForm.php" ?>
     </div>
     <?php $recommendedPosts = $this->recommendedPosts; include "views/components/posts/recommendedPosts.php" ?>
 </section>
-
 <script>
-    const likeUrl = '<?= AppUtil::url(['ctl' => 'like', 'act' => 'like']) ?>';
-    const unlikeUrl = '<?= AppUtil::url(['ctl' => 'like', 'act' => 'unlike']) ?>';
-    const storeCmUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'store']) ?>';
-    const loadCmUrl = '<?= AppUtil::url(['ctl' => 'comment', 'act' => 'load']) ?>';
     const currentUserId = <?= isset($_SESSION['user']['id']) ? (int)$_SESSION['user']['id'] : 0 ?>;
-    
+    document.addEventListener("DOMContentLoaded", function () {
+        CommentModule.load(<?= (int)$this->record['post']['id'] ?>);
+    })
 </script>
 <?php include_once "views/layouts/user/footer.php" ?>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        CommentModule.init('<?= (int)$data['post']['id'] ?>');
-        CommentModule.loadMoreComments(<?= (int)$data['post']['id'] ?>);
-    });
-</script>

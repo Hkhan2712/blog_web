@@ -24,19 +24,22 @@ class PostController extends MainController
 
     public function view($id)
     {
-        $id = (int)$id[1];
+        if (is_array($id) && isset($id[1])) {
+            $id = (int)$id[1];
+        } else {
+            $id = (int)$id;
+        }
         $pm = PostModel::getInstance();
         $this->record['user'] = PURepository::getUserByPostId($id);
         if (!$this->record['user']) {
             header('HTTP/1.0 404 Not Found');
             exit('User not found');
-        }   
-        $this->record['post'] = $pm->getRecord((int)$id);
+        }
+        $this->record['post'] = $pm->getRecord($id);
         $this->recommendedPosts = PostRepository::getRecommendedPosts($id);
         $userId = $_SESSION['user']['id'] ?? 0;
         $this->display();
     }
-
     
     public function add()
     {
@@ -44,10 +47,8 @@ class PostController extends MainController
             $title = trim($_POST['title'] ?? '');
             $content = trim($_POST['content'] ?? '');
             $image = '';
-            // var_dump($_FILES); exit;
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $image = ImageHelper::uploadMultipleSizesImg($_FILES, 'image');
-                // $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
             } 
             
             if ($title && $content) {
@@ -122,13 +123,11 @@ class PostController extends MainController
             $status = $_POST['status'] ?? 'draft';
             $image = $this->record['image_url'];
 
-            // Xử lý upload ảnh mới nếu có
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
+                $image = ImageHelper::uploadMultipleSizesImg($_FILES, 'image');
             }
 
             if ($title && $content) {
-                // Cập nhật bài viết
                 PostModel::getInstance()->updateWhere([
                     'title'     => $title,
                     'content'   => $content,
@@ -137,7 +136,6 @@ class PostController extends MainController
                     'updated_at'=> date('Y-m-d H:i:s')
                 ], "id = $id");
 
-                // ===== Categories =====
                 $postCategoryModel = PostCategoryModel::getInstance();
                 $postCategoryModel->deleteRecordsWhere("post_id = $id");
                 if (isset($_POST['categories']) && is_array($_POST['categories'])) {
@@ -146,7 +144,6 @@ class PostController extends MainController
                     }
                 }
 
-                // ===== Tags =====
                 $postTagModel = PostTagModel::getInstance();
                 $postTagModel->deleteRecordsWhere("post_id = $id");
 

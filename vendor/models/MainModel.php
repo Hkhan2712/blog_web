@@ -326,6 +326,7 @@ class MainModel {
 		$limit = (isset($options['limit']) && $options['limit'])? "LIMIT ".$options['limit']:"";
 
 		$sql = "SELECT $fields FROM $this->table $join $conditions $group $order $limit";
+        // var_dump($sql);
         $result = $this->con->query($sql);
 		if($result) {
 			$record = $result->fetch_assoc();

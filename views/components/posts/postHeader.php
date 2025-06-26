@@ -1,11 +1,15 @@
 <?php
 $tags = PostTagModel::getTagsByPostId($data['post']['id']);
-$isLiked = LikeRepository::checkExist(
-    (int)$_SESSION['user']['id'] ?? null, 
-    (int)$data['post']['id'], 
-    'post'
-);  
-// echo var_dump($data['user']['id'], $data['post']['id'], $isLiked); exit;
+$isLoggedIn = isset($_SESSION['user']['id']) && !empty($_SESSION['user']['id']);
+if (!$isLoggedIn) {
+    $isLiked = false;
+} else {
+    $isLiked = LikeRepository::checkExist(
+        (int)$_SESSION['user']['id'], 
+        (int)$data['post']['id'], 
+        'post'
+    );
+}
 ?>
 <div class="title d-flex flex-column">
     <h1><?= htmlspecialchars($data['post']['title']) ?></h1>

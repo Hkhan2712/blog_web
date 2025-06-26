@@ -18,7 +18,6 @@ var tagify = new Tagify(input, {
     }
 });
 
-// Set selected tags if available (edit page)
 <?php if (isset($selectedTags)): ?>
 tagify.addTags(<?= json_encode(array_column($selectedTags, 'name')) ?>);
 <?php endif; ?>

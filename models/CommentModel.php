@@ -89,12 +89,11 @@ class CommentModel extends CrudModel {
         $sql = "SELECT c.*, u.username AS author, u.avatar_url AS avatar
                 FROM {$this->table} c
                 JOIN users u ON c.user_id = u.id
-                WHERE c.post_id = ? AND c.parent_id IS NULL
+                WHERE c.post_id = ? AND c.parent_id = 0
                 ORDER BY c.created_at DESC
                 LIMIT ? OFFSET ?";
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param("iii", $postId, $limit, $offset);
-        // var_dump($sql); exit;
         $stmt->execute();
 
         $result = $stmt->get_result();
@@ -108,7 +107,7 @@ class CommentModel extends CrudModel {
     }
 
     public function hasReplies($parentId) {
-        $sql = "SELECT COUNT(*) as cnt FROM {$this->table} WHERE parent_id = ?";
+        $sql = "SELECT COUNT(1) as cnt FROM {$this->table} WHERE parent_id = ?";
         $stmt = $this->con->prepare($sql);
         $stmt->bind_param("i", $parentId);
         $stmt->execute();
@@ -123,7 +122,6 @@ class CommentModel extends CrudModel {
                 WHERE c.parent_id = ?
                 ORDER BY c.created_at ASC
                 LIMIT ? OFFSET ?";
-
         $stmt = $this->con->prepare($sql);
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $this->con->error);
@@ -131,7 +129,6 @@ class CommentModel extends CrudModel {
 
         $stmt->bind_param("iii", $parentId, $limit, $offset);
         $stmt->execute();
-
         $result = $stmt->get_result();
         $rows = [];
         while ($row = $result->fetch_assoc()) {
@@ -139,6 +136,20 @@ class CommentModel extends CrudModel {
         }
 
         $stmt->close();
+        // var_dump($rows);
         return $rows;
+    }
+    public function incrementCommentQuantityOfParent($parentId) {
+        $sql = "UPDATE {$this->table} SET child_comment_quantity = child_comment_quantity + 1 WHERE id = ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("i", $parentId);
+        return $stmt->execute();
+    }
+    public static function checkLiked($comment, $userId) {
+        if (!$userId) {
+            return false;
+        }
+        $cm = self::getInstance();
+        return $cm->hasUserLikedCm($comment, $userId);
     }
 }
