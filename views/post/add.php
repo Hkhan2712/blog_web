@@ -41,52 +41,52 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-	const uploadUrl = '<?= $uploadUrl ?>';
+	// const uploadUrl = '<?= $uploadUrl ?>';
 
-	tinymce.init({
-		selector: '#content',
-		height: 500,
-		plugins: 'image media link lists code table',
-		toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
-		automatic_uploads: true,
-		images_upload_url: uploadUrl,
-		file_picker_types: 'image',
-		images_upload_handler: function (blobInfo, success, failure) {
-			const formData = new FormData();
-			formData.append('file', blobInfo.blob(), blobInfo.filename());
+	// tinymce.init({
+	// 	selector: '#content',
+	// 	height: 500,
+	// 	plugins: 'image media link lists code table',
+	// 	toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
+	// 	automatic_uploads: true,
+	// 	images_upload_url: uploadUrl,
+	// 	file_picker_types: 'image',
+	// 	images_upload_handler: function (blobInfo, success, failure) {
+	// 		const formData = new FormData();
+	// 		formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-			fetch(uploadUrl, {
-				method: 'POST',
-				body: formData
-			})
-			.then(response => {
-				if (!response.ok) {
-					throw new Error("HTTP error " + response.status);
-				}
-				return response.json();
-			})
-			.then(result => {
-				if (result && result.location) {
-					success(result.location);
-				} else {
-					console.error("Invalid response:", result);
-					failure("Invalid response from server");
-				}
-			})
-			.catch(err => {
-				console.error(err);
-				failure("Upload failed: " + err.message);
-			});
-		}
-	});
+	// 		fetch(uploadUrl, {
+	// 			method: 'POST',
+	// 			body: formData
+	// 		})
+	// 		.then(response => {
+	// 			if (!response.ok) {
+	// 				throw new Error("HTTP error " + response.status);
+	// 			}
+	// 			return response.json();
+	// 		})
+	// 		.then(result => {
+	// 			if (result && result.location) {
+	// 				success(result.location);
+	// 			} else {
+	// 				console.error("Invalid response:", result);
+	// 				failure("Invalid response from server");
+	// 			}
+	// 		})
+	// 		.catch(err => {
+	// 			console.error(err);
+	// 			failure("Upload failed: " + err.message);
+	// 		});
+	// 	}
+	// });
 
-	document.querySelector('form').addEventListener('submit', function(e) {
-		const content = tinymce.get('content').getContent({ format: 'text' }).trim();
-		if (content === '') {
-			alert('Please enter content!');
-			e.preventDefault();
-		}
-	});
+	// document.querySelector('form').addEventListener('submit', function(e) {
+	// 	const content = tinymce.get('content').getContent({ format: 'text' }).trim();
+	// 	if (content === '') {
+	// 		alert('Please enter content!');
+	// 		e.preventDefault();
+	// 	}
+	// });
 });
 </script>
 

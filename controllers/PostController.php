@@ -44,10 +44,12 @@ class PostController extends MainController
             $title = trim($_POST['title'] ?? '');
             $content = trim($_POST['content'] ?? '');
             $image = '';
+            // var_dump($_FILES); exit;
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
+                $image = ImageHelper::uploadMultipleSizesImg($_FILES, 'image');
+                // $image = $this->uploadImg($_FILES, ['folder' => 'posts'], 'image');
             } 
-
+            
             if ($title && $content) {
                 $postModel = PostModel::getInstance();
 

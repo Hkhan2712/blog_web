@@ -10,7 +10,7 @@
             ?>
                 <div class="post-item d-flex" style="max-height: 284.79px;">
                     <div class="post-thumb">
-                        <img src="<?=RootREL."media/uploads/posts/".$post['image_url']?>" alt="">
+                        <img src="<?=RootREL."media/uploads/posts/cards/".$post['image_url']?>" alt="">
                     </div>
                     <div class="post-content">
                         <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
