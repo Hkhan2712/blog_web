@@ -192,7 +192,7 @@ function renderComment(comment, isReply = false) {
     }
 
     const isLiked = comment.is_liked ? '1' : '0';
-    const likeClass = comment.is_liked ? 'btn-primary text-white' : 'btn-outline-primary';
+    const likeClass = comment.is_liked ? 'btn-primary text-white' : 'btn-outline-secondary';
 
     return `
         <div class="${isReply ? 'reply-item' : 'comment-item'} mb-3" id="${isReply ? 'reply' : 'comment'}-${comment.id}">
