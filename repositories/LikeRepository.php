@@ -8,4 +8,19 @@ class LikeRepository {
         $entityType = preg_replace('/[^a-zA-Z0-9_]/', '', $entityType);
         return LikeModel::getInstance()->checkExist($userId, $entityId, $entityType);
     }
+    public static function hasLiked($userId, $entityId, $entityType) {
+        return LikeModel::getInstance()->checkExist($userId, $entityId, $entityType);
+    }
+
+    public static function like($userId, $entityId, $entityType) {
+        return LikeModel::getInstance()->add($userId, $entityId, $entityType);
+    }
+
+    public static function unlike($userId, $entityId, $entityType) {
+        return LikeModel::getInstance()->remove($userId, $entityId, $entityType);
+    }
+
+    public static function countLikes($entityId, $entityType) {
+        return LikeModel::getInstance()->countLike($entityId, $entityType);
+    }
 }

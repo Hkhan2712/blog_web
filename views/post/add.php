@@ -1,15 +1,38 @@
+<?php 
+    global $mediaFiles;
+    array_push($mediaFiles['css'], RootREL . 'media/css/ckeditor.css');
+    array_push($mediaFiles['js'], RootREL . 'media/js/ckeditor.js'); 
+?>
 <?php include_once "views/layouts/user/header.php"; ?>
 
 <div class="container py-5">
     <h2 class="mb-4">Add New Post</h2>
 
-    <form action="<?= AppUtil::url(['ctl' => 'post', 'act' => 'add']) ?>" method="POST" enctype="multipart/form-data">
+    <form action="<?= AppUtil::url(['ctl' => 'post', 'act' => 'add']) ?>" method="POST" enctype="multipart/form-data" id="post-form">
         <!-- Title -->
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" name="title" required>
         </div>
-
+        <!-- Status -->
+        <div class="mb-3">
+            <label class="form-label">Status</label><br>
+            <div class="btn-group" role="group">
+                <?php 
+                $statuses = ['draft' => 'Draft', 'published' => 'Published', 'pending' => 'Pending', 'archived' => 'Archived'];
+                foreach ($statuses as $value => $label): ?>
+                    <input 
+                        type="radio" 
+                        class="btn-check" 
+                        name="status" 
+                        id="status-<?= $value ?>" 
+                        value="<?= $value ?>" 
+                        <?= ($value === 'draft') ? 'checked' : '' ?> 
+                    >
+                    <label class="btn btn-outline-success" for="status-<?= $value ?>"><?= $label ?></label>
+                <?php endforeach; ?>
+            </div>
+        </div>
         <!-- Category -->
         <?php include_once "views/components/posts/categoryForm.php"; ?>
 
@@ -24,8 +47,19 @@
 
         <!-- Content -->
         <div class="mb-3">
-            <label for="content" class="form-label">Content</label>
-            <textarea class="form-control" id="content" name="content" rows="10"></textarea>
+            <label for="editor" class="form-label">Content</label>
+            <!-- Hidden textarea để submit -->
+            <textarea id="content" name="content" style="display:none;"></textarea>
+
+            <!-- CKEditor UI -->
+            <div class="editor-container editor-container_classic-editor editor-container_include-outline" id="editor-container">
+                <div class="editor-container__editor-wrapper">
+                    <div class="editor-container__sidebar" id="editor-outline"></div>
+                    <div class="editor-container__editor">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="d-flex gap-3">
@@ -34,60 +68,28 @@
         </div>
     </form>
 </div>
-
-<!-- TinyMCE -->
-<script src="https://cdn.tiny.cloud/1/bywwhzmxbuun804w7e7tkx0er4yfhcyylwb466fksk4l8m3r/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-<?php $uploadUrl = AppUtil::url(['ctl' => 'post', 'act' => 'uploadTinyMce']); ?>
-
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-	// const uploadUrl = '<?= $uploadUrl ?>';
+    document.addEventListener('DOMContentLoaded', async () => {
+        const editorEl = document.querySelector('#editor');
+        const textarea = document.querySelector('#content');
 
-	// tinymce.init({
-	// 	selector: '#content',
-	// 	height: 500,
-	// 	plugins: 'image media link lists code table',
-	// 	toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
-	// 	automatic_uploads: true,
-	// 	images_upload_url: uploadUrl,
-	// 	file_picker_types: 'image',
-	// 	images_upload_handler: function (blobInfo, success, failure) {
-	// 		const formData = new FormData();
-	// 		formData.append('file', blobInfo.blob(), blobInfo.filename());
+        try {
+            const editor = await ClassicEditor.create(editorEl, editorConfig); // editorConfig phải có trong ckeditor.js
 
-	// 		fetch(uploadUrl, {
-	// 			method: 'POST',
-	// 			body: formData
-	// 		})
-	// 		.then(response => {
-	// 			if (!response.ok) {
-	// 				throw new Error("HTTP error " + response.status);
-	// 			}
-	// 			return response.json();
-	// 		})
-	// 		.then(result => {
-	// 			if (result && result.location) {
-	// 				success(result.location);
-	// 			} else {
-	// 				console.error("Invalid response:", result);
-	// 				failure("Invalid response from server");
-	// 			}
-	// 		})
-	// 		.catch(err => {
-	// 			console.error(err);
-	// 			failure("Upload failed: " + err.message);
-	// 		});
-	// 	}
-	// });
+            // Khi submit, copy nội dung vào textarea để backend nhận được
+            document.querySelector('#post-form').addEventListener('submit', function (e) {
+                textarea.value = editor.getData();
 
-	// document.querySelector('form').addEventListener('submit', function(e) {
-	// 	const content = tinymce.get('content').getContent({ format: 'text' }).trim();
-	// 	if (content === '') {
-	// 		alert('Please enter content!');
-	// 		e.preventDefault();
-	// 	}
-	// });
-});
+                // Ngăn submit nếu không có nội dung
+                if (textarea.value.trim() === '') {
+                    alert('Please enter content!');
+                    e.preventDefault();
+                }
+            });
+        } catch (err) {
+            console.error('CKEditor init error:', err);
+        }
+    });
 </script>
 
 <?php include_once "views/layouts/user/footer.php"; ?>

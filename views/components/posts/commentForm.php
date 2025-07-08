@@ -7,7 +7,7 @@
         <?php if (!empty($_SESSION['user']['avatar_url'])): ?>
             <img src="<?= RootREL . "media/uploads/users/" . $_SESSION['user']['avatar_url'] ?>" alt="" class="rounded-circle" width="30" height="30">
         <?php endif; ?>
-        <form id="comment-form" action="" method="POST" style="flex-grow: 1;" onsubmit="CommentModule.submit(event, <?= (int)$data['post']['id'] ?>)">
+        <form id="comment-form" action="" method="POST" style="flex-grow: 1;" onsubmit="CommentModule.submit(event, <?= (int)$record['post']['id'] ?>)">
             <div class="mb-3">
                 <textarea id="comment-content" class="form-control" name="content" rows="3" required placeholder="Write your comment here..."></textarea>
             </div>

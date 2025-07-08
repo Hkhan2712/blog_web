@@ -1,7 +1,11 @@
 <div class="post-intro col-7">
     <?php $post = PostRepository::getOutstandingPost(); ?>
     <div class="image-container">
-        <img src="<?= RootREL."media/uploads/posts/featured/".$post['image_url']?>" alt="">
+        <?php
+            $imagePath = "media/uploads/posts/featured/" . $post['image_url'];
+            $imageUrl = file_exists($imagePath) ? RootREL . $imagePath : RootREL . "media/uploads/posts/featured/default.png";
+        ?>
+        <img src="<?= $imageUrl ?>" alt="">
         <div class="text-overlay w-100">
             <div class="d-flex gap-1 align-items-center">
                 <p><?= $post['user']['username']?></p> 

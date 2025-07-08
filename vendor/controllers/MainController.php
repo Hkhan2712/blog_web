@@ -39,19 +39,25 @@ class MainController {
 		}
 		return $str;
 	}
-
-	public function display($options=null) {
+	public function display($options = null, $data = []) {
 		global $app;
-		if(!isset($options['area']))	$options['area'] = $app['areaPath'];
-		if(!isset($options['ctl']))		$options['ctl'] = $this->controller;
-		if(!isset($options['act']))		$options['act'] = $this->action;
-		$view = "views/".$options['area'].$options['ctl']."/".$options['act'].".php";
+
+		if (!isset($options['area'])) $options['area'] = $app['areaPath'];
+		if (!isset($options['ctl']))  $options['ctl'] = $this->controller;
+		if (!isset($options['act']))  $options['act'] = $this->action;
+
+		$view = "views/" . $options['area'] . $options['ctl'] . "/" . $options['act'] . ".php";
+
+		if (!empty($data)) {
+			foreach ($data as $key => $value) {
+				$$key = $value; 
+			}
+		}
+
 		if (is_file($view)) {
 			include_once $view;
-		}
-		else {
-			// $this->viewfile = $view;
-			include_once "views/".$options['area']."staticpages/missingview.php";
+		} else {
+			include_once "views/" . $options['area'] . "staticpages/missingview.php";
 		}
 	}
 
@@ -104,6 +110,7 @@ class MainController {
 			return false;
 		}
 	}
+
 	public function uploadImg($files, $options = null, $name="image") {
 		if($name == null && count($files) == 1) $name = array_keys($files)[0];
 

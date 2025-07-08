@@ -6,7 +6,11 @@
             <?php $tags = PostTagModel::getTagsByPostId($data['id']); ?>
             <article class="col-md-4">
                 <div class="card post-card h-100 shadow-sm rounded overflow-hidden">
-                    <img src="<?= RootREL . "media/uploads/posts/cards/" . $data['image_url'] ?>" class="card-img-top" alt="<?= htmlspecialchars($data['title']) ?>" style="height: 200px; object-fit: cover;">
+                    <?php
+                        $imagePath = "media/uploads/posts/cards/" . $data['image_url'];
+                        $imageUrl = file_exists($imagePath) ? RootREL . $imagePath : RootREL . "media/uploads/posts/cards/default.png";
+                    ?>
+                    <img src="<?= $imageUrl ?>" class="card-img-top" alt="<?= htmlspecialchars($post['title']) ?>" style="height: 200px; object-fit: cover;">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
                             <span><?= $data['user']['username'] ?> · <?= date("M d, Y", strtotime($data['created_at'])) ?></span>

@@ -1,20 +1,32 @@
-<div class="mb-3">
-    <label class="form-label">Categories</label>
-    <div class="row">
-        <?php foreach ($categories as $category): ?>
-            <div class="col-6 col-md-4">
-                <div class="form-check">
-                    <input class="form-check-input" 
-                           type="checkbox" 
-                           name="categories[]" 
-                           value="<?= $category['id'] ?>" 
-                           id="category-<?= $category['id'] ?>"
-                           <?= (isset($selectedCategories) && in_array($category['id'], $selectedCategories)) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="category-<?= $category['id'] ?>">
-                        <?= htmlspecialchars($category['name']) ?>
-                    </label>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<div class="my-4">
+    <label for="categories" class="form-label">Categories</label>
+    <input id="categories" name="categories" placeholder="Add categories..." autofocus>
 </div>
+<script>
+    const catInput = document.querySelector('input[name=categories]');
+    const availableCategories = [
+        <?php foreach($categories as $cat) echo '"' . htmlspecialchars($cat['name']) . '",'; ?>
+    ];
+
+    const catTagify = new Tagify(catInput, {
+        whitelist: availableCategories,
+        dropdown: {
+            enabled: 1,
+            closeOnSelect: false
+        }
+    });
+
+    <?php if (isset($selectedCategories)): ?>
+    // Tìm tên tương ứng với ID đã lưu
+    const selectedNames = <?= json_encode(array_map(function($id) use ($categories) {
+        foreach ($categories as $cat) {
+            if ($cat['id'] == $id) return $cat['name'];
+        }
+        return null;
+    }, $selectedCategories)) ?>.filter(Boolean);
+
+    catTagify.addTags(selectedNames);
+    <?php endif; ?>
+</script>

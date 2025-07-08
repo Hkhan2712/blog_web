@@ -82,3 +82,6 @@
 .btn:disabled {
     background-color: #fff;
 }
+.liked {
+    fill: #228B22;
+}

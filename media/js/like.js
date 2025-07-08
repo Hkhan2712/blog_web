@@ -1,19 +1,17 @@
 const LikeModule = (() => {
     const api = {
         like: urls.like,
-        unlike: urls.unlike,
     };
     const toggleLike = (entityId, entityType = 'post', btn) => { 
         if (!btn) return;
 
         const isLiked = btn.getAttribute('data-liked') === '1';
-        const url = isLiked ? api.unlike : api.like;
-
+    
         const payload = {
             id: entityId,
             type: entityType
         };
-        fetch(url, {
+        fetch(api.like, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -26,7 +26,7 @@
         <a href="<?= AppUtil::url(['ctl' => 'post', 'act' => 'add']) ?>" class="btn btn-primary">+ New Post</a>
     </div>
 
-    <?php if (!empty($this->posts)): ?>
+    <?php if (!empty($posts)): ?>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
@@ -39,7 +39,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php $stt = 1; foreach ($this->posts as $post): ?>
+                    <?php $stt = 1; foreach ($posts as $post): ?>
                         <tr>
                             <td><?= $stt++ ?></td>
                             <td class="fw-medium"><?= htmlspecialchars($post['title']) ?></td>

@@ -6,7 +6,12 @@
         $tags = PostTagModel::getInstance()->getTagsByPostId($post['id']);
     ?>
         <li class="post-item row d-flex align-items-stretch" style="min-height: 150px;">
-            <img src="<?=RootREL."media/uploads/posts/thumbs/".$post['image_url']?>" alt="" class="post-image col-4 p-0">
+            <?php
+                $imagePath = "media/uploads/posts/thumbs/" . $post['image_url'];
+                $imageUrl = file_exists($imagePath) ? RootREL . $imagePath : RootREL . "media/uploads/posts/thumbs/default.png";
+            ?>
+            <img src="<?= $imageUrl ?>" alt="" class="post-iamge col-4 p-0">
+
             <div class="post-content col-8 p-0">
                 <div class="d-flex justify-content-between align-items-center">
                     <p class="detail">

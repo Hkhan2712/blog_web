@@ -62,10 +62,13 @@ class Validator {
 		else return ['status'=>false, 'message'=>"The type of this field should be string!"];
 	}
 
-	public function emailField($value) {
-		if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
-		  	return ['status'=>true];
-		} else return ['status'=>false, 'message'=>"Invalid email format!"];
+	public static function emailField($value) {
+		if (isset($value)) {
+			if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+				return ['status'=>true];
+			} else return ['status'=>false, 'message'=>"Invalid email format!"];
+		} else 
+			return ['status' => false, 'messsage' =>"Email is empty!"];
 	}
 
 	public function urlField($value) {

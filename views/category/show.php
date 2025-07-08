@@ -12,7 +12,11 @@
         ?>
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card post-card h-100 shadow-sm rounded overflow-hidden">
-                <img src="<?= RootREL . "media/uploads/posts/cards/" . $post['image_url'] ?>" class="card-img-top" alt="<?= htmlspecialchars($post['title']) ?>" style="height: 200px; object-fit: cover;">
+                <?php
+                    $imagePath = "media/uploads/posts/cards/" . $post['image_url'];
+                    $imageUrl = file_exists($imagePath) ? RootREL . $imagePath : RootREL . "media/uploads/posts/cards/default.png";
+                ?>
+                <img src="<?= $imageUrl ?>" class="card-img-top" alt="<?= htmlspecialchars($post['title']) ?>" style="height: 200px; object-fit: cover;">
 
                 <div class="card-body d-flex flex-column">
 

@@ -7,6 +7,8 @@
     <link rel="icon" type="image/x-icon" href="<?=RootREL?>media/img/favicon.png">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="<?=RootREL?>media/css/reset.css">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/45.2.1/ckeditor5.css" crossorigin>
+	<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5-premium-features/45.2.1/ckeditor5-premium-features.css" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href= "<?=RootREL?>media/css/header.css">
     <link rel="stylesheet" href="<?=RootREL?>media/css/footer.css">

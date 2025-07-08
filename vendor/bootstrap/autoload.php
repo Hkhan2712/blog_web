@@ -17,6 +17,7 @@ spl_autoload_register(function ($classname) {
         RootURI . 'components/SimpleImage/',
         RootURI . 'middleware/',
         RootURI . 'repositories/',
+        RootURI . 'services/',
     ];
 
     foreach ($baseDirs as $baseDir) {

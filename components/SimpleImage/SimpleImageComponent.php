@@ -124,10 +124,19 @@ class SimpleImageComponent {
    
 	function saveResize($filename, $permissions=null) {
 		$imgfunc = $this->imgfunc;
-		$imgfunc($this->image,$filename, $this->quality);
-		if( $permissions != null) {
-			chmod($filename,$permissions);
+		if ($imgfunc === 'imagejpeg') {
+			$imgfunc($this->image, $filename, $this->quality); 
+		} elseif ($imgfunc === 'imagepng') {
+			$compression = min(9, max(0, round(9 * (100 - $this->quality) / 100))); 
+			$imgfunc($this->image, $filename, $compression);
+		} else {
+			$imgfunc($this->image, $filename);
+		}
+
+		if ($permissions != null) {
+			chmod($filename, $permissions);
 		}
 	}
+
 }
 ?>

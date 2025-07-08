@@ -192,15 +192,21 @@ class MainModel {
 		} else $options['conditions'] = $wheres;
 		return $this->getDetailRecord($fields, $options);
 	}
+   
     public function getRecordsAdvanced($fields = '*', $wheres = [], $options = []) {
-        $sql = "SELECT {$fields} FROM {$this->table}";
-        
+        $baseTable = $this->table;
+        $sql = "SELECT {$fields} FROM {$baseTable}";
+
         $conditions = [];
         $params = [];
         $types = '';
 
+        if (!empty($options['join']) && is_array($options['join'])) {
+            foreach ($options['join'] as $joinTable => $onClause) {
+                $sql .= " JOIN {$joinTable} ON {$onClause}";
+            }
+        }
         foreach ($wheres as $key => $value) {
-            // Nếu là dạng ['operator' => ..., 'value' => ...]
             if (is_array($value) && isset($value['operator'], $value['value'])) {
                 $operator = strtoupper($value['operator']);
                 if ($operator === 'IN' && is_array($value['value'])) {
@@ -216,21 +222,20 @@ class MainModel {
                     $types .= $this->getTypeChar($value['value']);
                 }
             } else {
-                // Mặc định là '='
                 $conditions[] = "{$key} = ?";
                 $params[] = $value;
                 $types .= $this->getTypeChar($value);
             }
         }
-
         if (!empty($conditions)) {
             $sql .= ' WHERE ' . implode(' AND ', $conditions);
         }
-
+        if (isset($options['group_by'])) {
+            $sql .= ' GROUP BY ' . $options['group_by'];
+        }
         if (isset($options['order'])) {
             $sql .= ' ORDER BY ' . $options['order'];
         }
-
         if (isset($options['limit'])) {
             $sql .= ' LIMIT ' . (int)$options['limit'];
             if (isset($options['offset'])) {
@@ -238,12 +243,14 @@ class MainModel {
             }
         }
 
+        // echo $sql;
+
         $stmt = $this->con->prepare($sql);
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $this->con->error);
         }
 
-        if ($params) {
+        if (!empty($params)) {
             $stmt->bind_param($types, ...$params);
         }
 

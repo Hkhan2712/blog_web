@@ -1,7 +1,6 @@
 // media/js/config.js
 const urls = {
-    like: '/like/like',
-    unlike: '/like/unlike',
+    like: '/like/toggle',
     store: '/comment/store',
     load: '/comment/load'
 };
